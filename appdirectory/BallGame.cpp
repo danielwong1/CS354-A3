@@ -63,7 +63,7 @@ bool BallGame::frameRenderingQueued(const Ogre::FrameEvent& evt)
     mKeyboard->capture();
     mMouse->capture();
 
-    double cameraSpeed = 0.05;
+    double cameraSpeed = 0.005;
     Ogre::Radian rotationSpeed = Ogre::Radian(Ogre::Degree(.1));
     Ogre::Vector3 cameraPos = mCamera->getPosition();
 
@@ -167,16 +167,25 @@ bool BallGame::frameRenderingQueued(const Ogre::FrameEvent& evt)
 
 void BallGame::setupCEGUI(void) {
     mRenderer = &CEGUI::OgreRenderer::bootstrapSystem();
-
     CEGUI::ImageManager::setImagesetDefaultResourceGroup("Imagesets");
     CEGUI::Font::setDefaultResourceGroup("Fonts");
     CEGUI::Scheme::setDefaultResourceGroup("Schemes");
     CEGUI::WidgetLookManager::setDefaultResourceGroup("LookNFeel");
     CEGUI::WindowManager::setDefaultResourceGroup("Layouts");
-
+    CEGUI::SchemeManager::getSingleton().createFromFile("VanillaSkin.scheme");
+    
     CEGUI::WindowManager &wmgr = CEGUI::WindowManager::getSingleton();
-    CEGUI::Window* myRoot = wmgr.loadWindowLayout( "menu.layout" );
-    CEGUI::System::getSingleton().setGUISheet( myRoot );
+    CEGUI::Window* myRoot = wmgr.loadLayoutFromFile( "menu.layout" );
+    CEGUI::System::getSingleton().getDefaultGUIContext().setRootWindow( myRoot );
+    CEGUI::System::getSingleton().getDefaultGUIContext().getMouseCursor().setDefaultImage("Vanilla-Images/MouseArrow");
+    CEGUI::FontManager::getSingleton().createFreeTypeFont( "DejaVuSans-12", 12, true, "DejaVuSans.ttf", "Fonts");
+    CEGUI::System::getSingleton().getDefaultGUIContext().setDefaultFont( "DejaVuSans-12" );
+
+    myRoot->getChild("Host")->subscribeEvent(CEGUI::PushButton::EventClicked, 
+        CEGUI::Event::Subscriber(&BallGame::hostClick, this));
+
+        
+    printf("%s ughhhh\n", myRoot->getChild("Host")->getText().c_str());
 }
 
 void BallGame::setupSDL()
@@ -226,10 +235,26 @@ void BallGame::createCollisionCallbacks(void) {
     mWallCallback = new WallCallback(this);
 }
 
-bool BallGame::mouseMoved(const OIS::MouseEvent &ev)
-{
+bool BallGame::mouseMoved(const OIS::MouseEvent &ev) {
     mRot.x = ev.state.X.rel;
     mRot.y = ev.state.Y.rel;
+    CEGUI::System::getSingleton().getDefaultGUIContext().injectMouseMove(
+                ev.state.X.rel, 
+                ev.state.Y.rel);
+}
+
+
+bool BallGame::hostClick(const CEGUI::EventArgs &e) {
+    printf("hello!\n");
+    return true;
+}
+
+bool BallGame::mouseReleased(const OIS::MouseEvent &ev, OIS::MouseButtonID id) {
+    CEGUI::System::getSingleton().getDefaultGUIContext().injectMouseButtonUp(CEGUI::LeftButton);
+}
+
+bool BallGame::mousePressed(const OIS::MouseEvent &ev, OIS::MouseButtonID id) {
+    CEGUI::System::getSingleton().getDefaultGUIContext().injectMouseButtonDown(CEGUI::LeftButton);
 }
 
 void BallGame::go()

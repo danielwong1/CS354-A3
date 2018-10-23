@@ -61,11 +61,14 @@ protected:
     virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);
     virtual void createScene(void);
     virtual bool mouseMoved(const OIS::MouseEvent &ev);
+    virtual bool mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id);
+    virtual bool mousePressed(const OIS::MouseEvent &arg, OIS::MouseButtonID id);
     void setupCEGUI(void);
 
     void reset(btTransform ballTransform, btVector3 origin);
 
     void setupSDL(void);
+    bool hostClick(const CEGUI::EventArgs &e);
 
 private:
     int currentRotationX;

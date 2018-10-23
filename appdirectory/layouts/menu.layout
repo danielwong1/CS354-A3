@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GUILayout version="4">
+    <Window type="Vanilla/FrameWindow" name="Root" >
+        <Property name="Text" value="Select Your Role" />
+        <Property name="Font" value="DejaVuSans-12" />
+        <Property name="Area" value="{{0,0},{0,0},{1.0,0},{1.0,0}}" />
+        <Window type="Vanilla/Button" name="Host" >
+            <Property name="Text" value="Goalie (Host)" />
+            <Property name="Area" value="{{0.25,0},{0.2,0},{0.75,0},{0.4,0}}" />
+        </Window>
+        <Window type="Vanilla/Button" name="Kicker" >
+            <Property name="Text" value="Kicker (Client)" />
+            <Property name="Area" value="{{0.25,0},{0.6,0},{0.75,0},{0.8,0}}" />
+        </Window>
+    </Window>
+</GUILayout>
