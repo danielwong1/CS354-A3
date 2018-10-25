@@ -4,6 +4,11 @@
 Makefile
 Makefile.in
 
+Ogre.log
+OgreApp
+ogre.cfg
+CEGUI.log
+
 *.o
 autom4te.cache/
 configure
