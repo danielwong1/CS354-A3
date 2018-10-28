@@ -176,7 +176,9 @@ void BallGame::setupCEGUI(void) {
     
     CEGUI::WindowManager &wmgr = CEGUI::WindowManager::getSingleton();
     CEGUI::Window* myRoot = wmgr.loadLayoutFromFile( "menu.layout" );
+    
     CEGUI::System::getSingleton().getDefaultGUIContext().setRootWindow( myRoot );
+
     CEGUI::System::getSingleton().getDefaultGUIContext().getMouseCursor().setDefaultImage("Vanilla-Images/MouseArrow");
     CEGUI::FontManager::getSingleton().createFreeTypeFont( "DejaVuSans-12", 12, true, "DejaVuSans.ttf", "Fonts");
     CEGUI::System::getSingleton().getDefaultGUIContext().setDefaultFont( "DejaVuSans-12" );
@@ -184,6 +186,8 @@ void BallGame::setupCEGUI(void) {
     myRoot->getChild("Host")->subscribeEvent(CEGUI::PushButton::EventClicked, 
         CEGUI::Event::Subscriber(&BallGame::hostClick, this));
 
+    myRoot->getChild("Kicker")->subscribeEvent(CEGUI::PushButton::EventClicked, 
+        CEGUI::Event::Subscriber(&BallGame::clientClick, this));
         
     printf("%s ughhhh\n", myRoot->getChild("Host")->getText().c_str());
 }
@@ -203,10 +207,28 @@ void BallGame::setupSDL()
     //playSound("sounds/door1.wav", SDL_MIX_MAXVOLUME / 2);
 }
 
+void BallGame::setupNetwork()
+{
+    printf("isHost: %s\n", isHost ? "true" : "false");
+    network = new NetManager();
+    network->initNetManager();
+    if (isHost)
+    {
+        network->addNetworkInfo(PROTOCOL_TCP, NULL, 51215);
+        network->startServer();
+    } 
+    else
+    {
+        network->addNetworkInfo(PROTOCOL_TCP, NULL, 51215);
+        network->startClient();
+    }
+}
+
 void BallGame::createScene(void)
 {
     setupCEGUI();
     setupSDL();
+    
     mSceneMgr->setShadowTechnique(Ogre::SHADOWTYPE_STENCIL_MODULATIVE);
 
     lWall = new Wall("leftWall", mSceneMgr, simulator, Ogre::Vector3::UNIT_X);
@@ -245,7 +267,14 @@ bool BallGame::mouseMoved(const OIS::MouseEvent &ev) {
 
 
 bool BallGame::hostClick(const CEGUI::EventArgs &e) {
-    printf("hello!\n");
+    isHost = true;
+    setupNetwork();
+    return true;
+}
+
+bool BallGame::clientClick(const CEGUI::EventArgs &e) {
+    isHost = false;
+    setupNetwork();
     return true;
 }
 
@@ -284,7 +313,7 @@ extern "C" {
     {
         // Create application object
         BallGame app;
-
+        
         try {
             app.go();
         } catch(Ogre::Exception& e)  {
