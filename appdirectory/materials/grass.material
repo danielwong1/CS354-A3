@@ -5,12 +5,13 @@ material assignment3/grass
 	{
 		pass
 		{
-			ambient 0 0 0 1
+			ambient 0.5 0.5 0.5 1
 			diffuse 0.65098 0.647059 0.596078 1
 
 			texture_unit
 			{
-				texture TexturesCom_Grass0130_2_M.jpg
+				texture grass.jpg
+				scale 0.05 0.05
 			}
 		}
 

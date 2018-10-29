@@ -248,6 +248,7 @@ void BallGame::createScene(void)
     mBall = new Ball(ballString, mSceneMgr, simulator);
     mPaddle = new Paddle(mSceneMgr, simulator);
 
+    mSceneMgr->setSkyBox(true, "sky/Material");
     new Goal(mSceneMgr, simulator);
     mSceneMgr->setAmbientLight(Ogre::ColourValue(0.2, 0.2, 0.2));
 

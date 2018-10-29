@@ -1,0 +1,20 @@
+
+material sky/Material
+{
+	technique
+	{
+		pass
+		{
+			lighting off
+			depth_write off
+
+			texture_unit
+			{
+				cubic_texture negz.jpg posz.jpg negx.jpg posx.jpg negy.jpg posy.jpg separateUV
+				tex_address_mode clamp
+			}
+		}
+
+	}
+
+}

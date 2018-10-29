@@ -22,8 +22,8 @@ Ball::Ball(Ogre::String name,
 	rootNode->scale(0.005f, 0.005f, 0.005f);
     	
     geom->setCastShadows(true);
-    geom->setMaterialName("OceanHLSL_GLSL");
-    Ogre::MaterialPtr mp = Ogre::MaterialManager::getSingleton().getByName("OceanHLSL_GLSL");
+    geom->setMaterialName("assignment3/ball");
+    Ogre::MaterialPtr mp = Ogre::MaterialManager::getSingleton().getByName("assignment3/ball");
     mp.get()->setReceiveShadows(false);
 
 	shape = new btSphereShape(btScalar(.5f));

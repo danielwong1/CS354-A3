@@ -21,6 +21,8 @@ Goal::Goal(
     geom->setCastShadows(true);
     geom->setMaterialName("gate/Material");
     Ogre::MaterialPtr mp = Ogre::MaterialManager::getSingleton().getByName("gate/Material");
+    mp.get()->setDiffuse(1.0, 1.0, 1.0, 0.5);
+    mp.get()->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
     mp.get()->setReceiveShadows(false);
 
 	shape = new btBoxShape(btVector3(15, 15, 15));
