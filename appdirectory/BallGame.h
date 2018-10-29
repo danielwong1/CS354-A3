@@ -37,6 +37,7 @@ public:
     btClock* f_collisionClock;
     bool started;
     Ogre::Vector2 mRot;
+    std::string* ipAddr;
 
     BallGame(void);
     virtual ~BallGame(void);

@@ -14,6 +14,9 @@
 #include <time.h>
 #include <string>
 #include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <getopt.h>
 #include "Ball.h"
 #include "Paddle.h"
 #include "BallScoreCallback.h"
@@ -307,13 +310,32 @@ extern "C" {
 #endif
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
-    INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT)
+    INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT) {
+
 #else
-    int main(int argc, char *argv[])
+    int main(int argc, char *argv[]) {
 #endif
-    {
+        
         // Create application object
         BallGame app;
+
+        const struct option long_options[] = {
+            {"ip", 1, 0, 'i'},
+            {0,0,0,0},
+        };
+        int option_index = 0;
+        int c = 0;
+
+        while(c != -1) {
+            c = getopt_long(argc, argv, "i:", long_options, &option_index);
+            switch(c) 
+            {
+                case 'i':
+                    app.ipAddr = new std::string(optarg);
+                    printf("ip: %s", app.ipAddr->c_str());
+                    break;
+            }
+        }
 
         try {
             app.go();
