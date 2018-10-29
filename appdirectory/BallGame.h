@@ -15,6 +15,7 @@
 #include "Physics.h"
 #include "BaseApplication.h"
 #include "Score.h"
+#include "Field.h"
 
 class Paddle;
 class Ball;
@@ -42,15 +43,12 @@ public:
     virtual void go();
 
     void createCollisionCallbacks(void);
+    void addResources(void);
 
 	Paddle* mPaddle;
 	Ball* mBall;
 
-	Wall* mWall;
-    Wall* bWall;
-    Wall* lWall;
-    Wall* rWall;
-    Wall* tWall;
+	Field* mField;
 
 protected:
 	BallScoreCallback* mBallScoreCallback;

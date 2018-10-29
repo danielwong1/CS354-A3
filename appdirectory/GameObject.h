@@ -34,6 +34,10 @@ class GameObject {
     OgreMotionState* motionState);
 
     GameObject();
+    void moveTo(const Ogre::Vector3 &position);
+    void moveBy(const Ogre::Vector3 &distance);
+    void rotateBy(const Ogre::Quaternion &rotation);
+
 };
 
 #endif

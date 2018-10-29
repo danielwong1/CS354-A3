@@ -40,13 +40,7 @@ Paddle::Paddle(Ogre::SceneManager* sceneMgr,
     moveBy(Ogre::Vector3(0.0f, 2.0f, 8.0f));    
 }
 
-void Paddle::moveTo(const Ogre::Vector3 &position) {
-    btTransform worldTransform;
-    motionState->getWorldTransform(worldTransform);
 
-    worldTransform.setOrigin(btVector3(position.x, position.y, position.z));
-    motionState->setWorldTransform(worldTransform);
-}
 
 btVector3 Paddle::getPosition() const {
     btTransform worldTransform;
@@ -54,28 +48,6 @@ btVector3 Paddle::getPosition() const {
     return worldTransform.getOrigin();
 }
 
-void Paddle::moveBy(const Ogre::Vector3 &distance) {
-    btTransform worldTransform;
-    motionState->getWorldTransform(worldTransform);
-
-    btVector3 origin = worldTransform.getOrigin();
-    worldTransform.setOrigin(origin + btVector3(distance.x, distance.y, distance.z));
-    motionState->setWorldTransform(worldTransform);
-}
-
-void Paddle::rotateBy(const Ogre::Quaternion &rotation) {
-    btTransform worldTransform;
-    motionState->getWorldTransform(worldTransform);
-
-    Ogre::Radian angle;
-    Ogre::Vector3 axis;
-    rotation.ToAngleAxis(angle, axis);
-
-    btQuaternion bulletRotation(btVector3(axis.x, axis.y, axis.z), btScalar(angle.valueRadians()));
-    btQuaternion currentRotation = worldTransform.getRotation();
-    worldTransform.setRotation(currentRotation * bulletRotation);
-    motionState->setWorldTransform(worldTransform);
-}
 
 void Paddle::getRotation(btQuaternion& quaternion) {
     btTransform worldTransform;

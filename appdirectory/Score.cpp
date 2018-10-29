@@ -1,7 +1,7 @@
 #include "Score.h"
 #include <string>
 #include <sstream>
-
+#include <iostream>
 
 Score::Score()
 {

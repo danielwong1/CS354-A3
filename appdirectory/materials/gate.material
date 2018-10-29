@@ -1,0 +1,14 @@
+
+material gate/Material
+{
+	technique
+	{
+		pass
+		{
+			ambient 0.117647 0.117647 0.117647 1
+			diffuse 0.752941 0.752941 0.752941 1
+		}
+
+	}
+
+}

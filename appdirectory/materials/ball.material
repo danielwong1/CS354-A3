@@ -1,0 +1,19 @@
+
+material assignment3/ball
+{
+	technique
+	{
+		pass
+		{
+			ambient 0 0 0 1
+			diffuse 0.65098 0.647059 0.596078 1
+
+			texture_unit
+			{
+				texture soccer_ball.jpg
+			}
+		}
+
+	}
+
+}

@@ -4,6 +4,7 @@
 #include "Ball.h"
 #include "Score.h"
 #include "src/audio.h"
+#include <iostream>
 
 /**
  * Constructs the BallBoundaryCallback

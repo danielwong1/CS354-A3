@@ -10,15 +10,18 @@
 #include <OgreWindowEventUtilities.h>
 #include <OgreVector3.h>
 #include <OgreMeshManager.h>
+#include <OgreResourceGroupManager.h>
 #include <time.h>
 #include <string>
-#include "Wall.h"
+#include <iostream>
 #include "Ball.h"
 #include "Paddle.h"
 #include "BallScoreCallback.h"
 #include "BallPaddleCallback.h"
 #include "BallFloorCallback.h"
 #include "WallCallback.h"
+#include "Field.h"
+#include "Goal.h"
 
 std::string BallGame::ballString = "ball";
 std::string BallGame::botString = "bot";
@@ -75,7 +78,7 @@ bool BallGame::frameRenderingQueued(const Ogre::FrameEvent& evt)
         mBall->body->applyCentralImpulse(btVector3(0.0f, 0.0f, -3.0f));
     }
 
-    mCamera->lookAt(Ogre::Vector3(0,-Wall::GRID_SIZE/4 ,-Wall::GRID_SIZE));
+    // mCamera->lookAt(Ogre::Vector3(0,-Wall::GRID_SIZE/4 ,-Wall::GRID_SIZE));
 
     if(mKeyboard->isKeyDown(OIS::KC_UP)) {
         if (currentRotationY < rotationBound) {
@@ -111,56 +114,56 @@ bool BallGame::frameRenderingQueued(const Ogre::FrameEvent& evt)
     mPaddle->moveBy(Ogre::Vector3(cameraSpeed * mRot.x, -cameraSpeed * mRot.y, 0));
     mRot = Ogre::Vector2::ZERO;
     btVector3 position = mPaddle->getPosition();
-    mPaddle->moveTo(Ogre::Vector3(
-        Ogre::Math::Clamp(position.x(), -(Wall::GRID_SIZE * 0.5f) + 3.0f, Wall::GRID_SIZE * 0.5f - 3.0f),
-        Ogre::Math::Clamp(position.y(), -(Wall::GRID_SIZE * 0.5f) + 3.0f, Wall::GRID_SIZE * 0.5f - 3.0f),
-        position.z()
-    ));
-    cameraPos = mCamera->getPosition();
-    mCamera->setPosition(Ogre::Vector3(
-        Ogre::Math::Clamp(cameraPos.x, -(Wall::GRID_SIZE * 0.5f) + 3.0f, Wall::GRID_SIZE * 0.5f - 3.0f),
-        Ogre::Math::Clamp(cameraPos.y, -(Wall::GRID_SIZE * 0.5f) + 3.0f, Wall::GRID_SIZE * 0.5f - 3.0f),
-        cameraPos.z
-    ));
-    mSceneMgr->setShadowFarDistance(mCamera->getPosition().z + Wall::GRID_SIZE);
+    // mPaddle->moveTo(Ogre::Vector3(
+    //     // Ogre::Math::Clamp(position.x(), -(Wall::GRID_SIZE * 0.5f) + 3.0f, Wall::GRID_SIZE * 0.5f - 3.0f),
+    //     // Ogre::Math::Clamp(position.y(), -(Wall::GRID_SIZE * 0.5f) + 3.0f, Wall::GRID_SIZE * 0.5f - 3.0f),
+    //     position.z()
+    // ));
+    // cameraPos = mCamera->getPosition();
+    // mCamera->setPosition(Ogre::Vector3(
+    //     // Ogre::Math::Clamp(cameraPos.x, -(Wall::GRID_SIZE * 0.5f) + 3.0f, Wall::GRID_SIZE * 0.5f - 3.0f),
+    //     // Ogre::Math::Clamp(cameraPos.y, -(Wall::GRID_SIZE * 0.5f) + 3.0f, Wall::GRID_SIZE * 0.5f - 3.0f),
+    //     cameraPos.z
+    // ));
+    // mSceneMgr->setShadowFarDistance(mCamera->getPosition().z + Wall::GRID_SIZE);
     
      if(simulator != NULL && started) {
         simulator->dynamicsWorld->stepSimulation(simulator->physicsClock->getTimeSeconds());
         simulator->physicsClock->reset();
 
-        btTransform ballTransform;
-        mBall->motionState->getWorldTransform(ballTransform);
-        btVector3 origin = ballTransform.getOrigin();
+        // btTransform ballTransform;
+        // mBall->motionState->getWorldTransform(ballTransform);
+        // btVector3 origin = ballTransform.getOrigin();
 
-        if (origin.z() > Wall::GRID_SIZE) {
-            reset(ballTransform, origin);
-        }
+        // if (origin.z() > Wall::GRID_SIZE) {
+        //     reset(ballTransform, origin);
+        // }
 
-        simulator->dynamicsWorld->contactPairTest(mBall->body, mWall->body, *mBallScoreCallback);
-        if(mBall->colliding) {
-            bool away = mBall->rootNode->getPosition().distance(mWall->rootNode->getPosition()) > Wall::GRID_SIZE / 4;
-            if(collisionClock->getTimeSeconds() > .3 && away) {
-                mBall->colliding = false;
-            }
-        }
-        simulator->dynamicsWorld->contactPairTest(mBall->body, bWall->body, *mBallFloorCallback);
-        if(mBall->f_colliding) {
-            bool away = mBall->rootNode->getPosition().distance(bWall->rootNode->getPosition()) > Wall::GRID_SIZE / 4;
-            if(collisionClock->getTimeSeconds() > .3 && away) {
-                mBall->f_colliding = false;
-            }
-        }
+        // // simulator->dynamicsWorld->contactPairTest(mBall->body, mWall->body, *mBallScoreCallback);
+        // if(mBall->colliding) {
+        //     // bool away = mBall->rootNode->getPosition().distance(mWall->rootNode->getPosition()) > Wall::GRID_SIZE / 4;
+        //     if(collisionClock->getTimeSeconds() > .3 && away) {
+        //         mBall->colliding = false;
+        //     }
+        // }
+        // // simulator->dynamicsWorld->contactPairTest(mBall->body, bWall->body, *mBallFloorCallback);
+        // if(mBall->f_colliding) {
+        //     // bool away = mBall->rootNode->getPosition().distance(bWall->rootNode->getPosition()) > Wall::GRID_SIZE / 4;
+        //     if(collisionClock->getTimeSeconds() > .3 && away) {
+        //         mBall->f_colliding = false;
+        //     }
+        // }
 
-        btVector3 vel = mBall->body->getLinearVelocity();
-        btScalar newX = Ogre::Math::Clamp(vel.getX(), -40.0f, 40.0f);
-        btScalar newY = Ogre::Math::Clamp(vel.getY(), -40.0f, 40.0f);
-        btScalar newZ = Ogre::Math::Clamp(vel.getZ(), -40.0f, 40.0f);
+        // btVector3 vel = mBall->body->getLinearVelocity();
+        // btScalar newX = Ogre::Math::Clamp(vel.getX(), -40.0f, 40.0f);
+        // btScalar newY = Ogre::Math::Clamp(vel.getY(), -40.0f, 40.0f);
+        // btScalar newZ = Ogre::Math::Clamp(vel.getZ(), -40.0f, 40.0f);
     
-        mBall->body->setLinearVelocity(btVector3(newX, newY, newZ));
-        simulator->dynamicsWorld->contactPairTest(mBall->body, mPaddle->body, *mBallPaddleCallback);
-        simulator->dynamicsWorld->contactPairTest(mBall->body, tWall->body, *mWallCallback);
-        simulator->dynamicsWorld->contactPairTest(mBall->body, rWall->body, *mWallCallback);
-        simulator->dynamicsWorld->contactPairTest(mBall->body, lWall->body, *mWallCallback);
+        // mBall->body->setLinearVelocity(btVector3(newX, newY, newZ));
+        // simulator->dynamicsWorld->contactPairTest(mBall->body, mPaddle->body, *mBallPaddleCallback);
+        // simulator->dynamicsWorld->contactPairTest(mBall->body, tWall->body, *mWallCallback);
+        // simulator->dynamicsWorld->contactPairTest(mBall->body, rWall->body, *mWallCallback);
+        // simulator->dynamicsWorld->contactPairTest(mBall->body, lWall->body, *mWallCallback);
     }
     return true;
 }
@@ -172,20 +175,43 @@ void BallGame::setupCEGUI(void) {
     CEGUI::Scheme::setDefaultResourceGroup("Schemes");
     CEGUI::WidgetLookManager::setDefaultResourceGroup("LookNFeel");
     CEGUI::WindowManager::setDefaultResourceGroup("Layouts");
-    CEGUI::SchemeManager::getSingleton().createFromFile("VanillaSkin.scheme");
+    // CEGUI::SchemeManager::getSingleton().createFromFile("VanillaSkin.scheme");
     
-    CEGUI::WindowManager &wmgr = CEGUI::WindowManager::getSingleton();
-    CEGUI::Window* myRoot = wmgr.loadLayoutFromFile( "menu.layout" );
-    CEGUI::System::getSingleton().getDefaultGUIContext().setRootWindow( myRoot );
-    CEGUI::System::getSingleton().getDefaultGUIContext().getMouseCursor().setDefaultImage("Vanilla-Images/MouseArrow");
-    CEGUI::FontManager::getSingleton().createFreeTypeFont( "DejaVuSans-12", 12, true, "DejaVuSans.ttf", "Fonts");
-    CEGUI::System::getSingleton().getDefaultGUIContext().setDefaultFont( "DejaVuSans-12" );
+    // CEGUI::WindowManager &wmgr = CEGUI::WindowManager::getSingleton();
+    // CEGUI::Window* myRoot = wmgr.loadLayoutFromFile( "menu.layout" );
+    // CEGUI::System::getSingleton().getDefaultGUIContext().setRootWindow( myRoot );
+    // CEGUI::System::getSingleton().getDefaultGUIContext().getMouseCursor().setDefaultImage("Vanilla-Images/MouseArrow");
+    // CEGUI::FontManager::getSingleton().createFreeTypeFont( "DejaVuSans-12", 12, true, "DejaVuSans.ttf", "Fonts");
+    // CEGUI::System::getSingleton().getDefaultGUIContext().setDefaultFont( "DejaVuSans-12" );
 
-    myRoot->getChild("Host")->subscribeEvent(CEGUI::PushButton::EventClicked, 
-        CEGUI::Event::Subscriber(&BallGame::hostClick, this));
+    // myRoot->getChild("Host")->subscribeEvent(CEGUI::PushButton::EventClicked, 
+    //     CEGUI::Event::Subscriber(&BallGame::hostClick, this));
 
         
-    printf("%s ughhhh\n", myRoot->getChild("Host")->getText().c_str());
+    // printf("%s ughhhh\n", myRoot->getChild("Host")->getText().c_str());
+}
+
+void BallGame::addResources() {
+    Ogre::ResourceGroupManager* resourceGroupManager = Ogre::ResourceGroupManager::getSingletonPtr();
+    resourceGroupManager->addResourceLocation(
+        "./models",
+        "FileSystem",
+        "Assignment3/Models"
+    );
+    resourceGroupManager->addResourceLocation(
+        "./materials",
+        "FileSystem",
+        "Assignment3/Materials"
+    );
+    resourceGroupManager->addResourceLocation(
+        "./textures",
+        "FileSystem",
+        "Assignment3/Textures"
+    );
+
+    resourceGroupManager->initialiseResourceGroup("Assignment3/Materials");
+    resourceGroupManager->initialiseResourceGroup("Assignment3/Models");
+    resourceGroupManager->initialiseResourceGroup("Assignment3/Textures");
 }
 
 void BallGame::setupSDL()
@@ -207,32 +233,36 @@ void BallGame::createScene(void)
 {
     setupCEGUI();
     setupSDL();
+    addResources();
     mSceneMgr->setShadowTechnique(Ogre::SHADOWTYPE_STENCIL_MODULATIVE);
 
-    lWall = new Wall("leftWall", mSceneMgr, simulator, Ogre::Vector3::UNIT_X);
-    tWall = new Wall("topWall", mSceneMgr, simulator, Ogre::Vector3::NEGATIVE_UNIT_Y);
-    bWall = new Wall(botString, mSceneMgr, simulator, Ogre::Vector3::UNIT_Y);
-    rWall = new Wall("rightWall", mSceneMgr, simulator, Ogre::Vector3::NEGATIVE_UNIT_X);
-    mWall = new Wall("backWall", mSceneMgr, simulator, Ogre::Vector3::UNIT_Z);
+    // lWall = new Wall("leftWall", mSceneMgr, simulator, Ogre::Vector3::UNIT_X);
+    // tWall = new Wall("topWall", mSceneMgr, simulator, Ogre::Vector3::NEGATIVE_UNIT_Y);
+    // bWall = new Wall(botString, mSceneMgr, simulator, Ogre::Vector3::UNIT_Y);
+    // rWall = new Wall("rightWall", mSceneMgr, simulator, Ogre::Vector3::NEGATIVE_UNIT_X);
+    // mWall = new Wall("backWall", mSceneMgr, simulator, Ogre::Vector3::UNIT_Z);
+    mField = new Field(mSceneMgr, simulator);
     mBall = new Ball(ballString, mSceneMgr, simulator);
     mPaddle = new Paddle(mSceneMgr, simulator);
 
+    new Goal(mSceneMgr, simulator);
     mSceneMgr->setAmbientLight(Ogre::ColourValue(0.2, 0.2, 0.2));
 
     Ogre::Light* light = mSceneMgr->createLight("SpotLight");
-    light->setPosition(Ogre::Vector3(0, Wall::GRID_SIZE / 4, 0));
+    light->setPosition(Ogre::Vector3(0, 10, 0));
     mSceneMgr->setShadowColour(Ogre::ColourValue(0.5, 0.5, 0.5));
     
     light->setCastShadows(true);
+    scoreObj = new Score();
 
     createCollisionCallbacks();
 }
 
 void BallGame::createCollisionCallbacks(void) {
-    mBallScoreCallback = new BallScoreCallback(this);
-    mBallFloorCallback = new BallFloorCallback(this);
+    // mBallScoreCallback = new BallScoreCallback(this);
+    // mBallFloorCallback = new BallFloorCallback(this);
     mBallPaddleCallback = new BallPaddleCallback(this);
-    mWallCallback = new WallCallback(this);
+    // mWallCallback = new WallCallback(this);
 }
 
 bool BallGame::mouseMoved(const OIS::MouseEvent &ev) {
