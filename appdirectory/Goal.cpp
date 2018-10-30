@@ -23,17 +23,20 @@ Goal::Goal(
     Ogre::MaterialPtr mp = Ogre::MaterialManager::getSingleton().getByName("gate/Material");
     mp.get()->setReceiveShadows(false);
 
+    tr.setRotation(btQuaternion(btVector3(0.0, 1.0, 0.0), -1.5708));
+    // tr.setOrigin(btVector3(0.0, 0.0, 0.0));
 	shape = new btBoxShape(btVector3(15, 15, 15));
 	mass = 0.05f;
     shape->calculateLocalInertia(mass, inertia);
 	motionState = new OgreMotionState(tr, rootNode);
-        
+    
 	body = new btRigidBody(mass, motionState, shape, inertia);
+
     body->setUserPointer((void*) this);
     body->setRestitution(0.95f);
     simulator->dynamicsWorld->addRigidBody(body);
+    // body->setGravity(btVector3(0.0f, 0.0f, 0.0f));
     simulator->gameObjects.push_back(this);
 
-    moveBy(Ogre::Vector3(0, 4.5, -25));
-    rotateBy(Ogre::Quaternion(Ogre::Radian(Ogre::Degree(-90)), Ogre::Vector3::UNIT_Y));
+
 }

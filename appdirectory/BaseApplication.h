@@ -109,6 +109,8 @@ protected:
     Ogre::String                mResourcesCfg;
     Ogre::String                mPluginsCfg;
 
+    Ogre::Camera*               hostCamera;
+
     Ogre::OverlaySystem*        mOverlaySystem;
 
     bool                        mCursorWasVisible;	// Was cursor visible before dialog appeared?

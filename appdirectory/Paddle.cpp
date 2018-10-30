@@ -41,14 +41,6 @@ Paddle::Paddle(Ogre::SceneManager* sceneMgr,
 }
 
 
-
-btVector3 Paddle::getPosition() const {
-    btTransform worldTransform;
-    motionState->getWorldTransform(worldTransform);
-    return worldTransform.getOrigin();
-}
-
-
 void Paddle::getRotation(btQuaternion& quaternion) {
     btTransform worldTransform;
     motionState->getWorldTransform(worldTransform);

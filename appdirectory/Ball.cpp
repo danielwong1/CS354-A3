@@ -30,7 +30,7 @@ Ball::Ball(Ogre::String name,
 	mass = 0.05f;
     shape->calculateLocalInertia(mass, inertia);
 	motionState = new OgreMotionState(tr, rootNode);
-        
+
 	body = new btRigidBody(mass, motionState, shape, inertia);
     body->setUserPointer((void*) this);
     body->setRestitution(0.95f);
@@ -38,3 +38,4 @@ Ball::Ball(Ogre::String name,
     simulator->dynamicsWorld->addRigidBody(body);
     simulator->gameObjects.push_back(this);
 }
+

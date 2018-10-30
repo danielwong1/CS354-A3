@@ -9,7 +9,6 @@ class Paddle : public GameObject {
   Physics* simulator);
 
   void getRotation(btQuaternion& quaternion);
-  btVector3 getPosition() const;
 };
 
 #endif

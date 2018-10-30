@@ -14,15 +14,15 @@ Field::Field(
   this->simulator = simulator;
   Ogre::Vector3 direction(0, 1, 0);
 
-  Ogre::MovablePlane plane(direction, -0.5);
+  Ogre::MovablePlane plane(direction, 0.0);
   Ogre::MeshManager::getSingleton().createPlane(
-      name, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, 
-      plane, SIZE, SIZE, 20, 20, true, 1, 1, 1, 
+      name + "mesh", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, 
+      plane, 100, 100, 5, 5, true, 1, 1, 1,
       direction.perpendicular()
   );
 
   rootNode = this->sceneMgr->getRootSceneNode()->createChildSceneNode();
-  geom = this->sceneMgr->createEntity(name);
+  geom = this->sceneMgr->createEntity(name, name + "mesh", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
   rootNode->attachObject(geom);
 
   geom->setMaterialName("assignment3/grass");
@@ -30,8 +30,8 @@ Field::Field(
   mp.get()->setReceiveShadows(true);
   geom->setCastShadows(false);
 
-  tr.setOrigin(btVector3(0.0, -5.0, 0.0));
-  shape = new btBoxShape(btVector3(SIZE * 0.5, SIZE * 0.5, SIZE * 0.5));
+  tr.setOrigin(btVector3(0.0, 0.0, 0.0));
+  shape = new btBoxShape(btVector3(100.0f, 0.2f, 100.0f));
   mass = 0.0;
   motionState = new OgreMotionState(tr, rootNode);
   body = new btRigidBody(mass, motionState, shape);

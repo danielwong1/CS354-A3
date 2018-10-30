@@ -16,6 +16,7 @@
 #include "BaseApplication.h"
 #include "Score.h"
 #include "Field.h"
+#include "NetManager.h"
 
 class Paddle;
 class Ball;
@@ -36,7 +37,9 @@ public:
     btClock* collisionClock;
     btClock* f_collisionClock;
     bool started;
+    bool isHost;
     Ogre::Vector2 mRot;
+    NetManager* network;
     std::string* ipAddr;
 
     BallGame(void);
@@ -62,11 +65,13 @@ protected:
     virtual bool mouseMoved(const OIS::MouseEvent &ev);
     virtual bool mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id);
     virtual bool mousePressed(const OIS::MouseEvent &arg, OIS::MouseButtonID id);
+    virtual void createViewports(void);
     void setupCEGUI(void);
 
     void reset(btTransform ballTransform, btVector3 origin);
 
     void setupSDL(void);
+    void setupNetwork(void);
     bool hostClick(const CEGUI::EventArgs &e);
 
 private:

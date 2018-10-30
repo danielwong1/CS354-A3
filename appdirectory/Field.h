@@ -5,7 +5,7 @@
 
 class Field : public GameObject {
  public:
-  static const int SIZE = 100;
+  static const int SIZE = 10;
 
   Field(
     Ogre::SceneManager* sceneMgr, 

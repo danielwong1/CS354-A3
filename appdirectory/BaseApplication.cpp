@@ -16,8 +16,8 @@ http://www.ogre3d.org/wiki/
 */
 
 #include "BaseApplication.h"
-#include "Wall.h"
 #include <OgreTextureManager.h>
+#include "Wall.h"
 #include "src/audio.h"
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
@@ -95,6 +95,14 @@ void BaseApplication::createCamera(void)
     // Look back along -Z
     mCamera->lookAt(Ogre::Vector3(0, -Wall::GRID_SIZE/4 ,-Wall::GRID_SIZE));
     mCamera->setNearClipDistance(5);
+
+    // Create the camera
+    hostCamera = mSceneMgr->createCamera("HostCam");
+
+    hostCamera->setPosition(Ogre::Vector3(0, 0, -Wall::GRID_SIZE*15/4));
+    // Look back along -Z
+    hostCamera->lookAt(Ogre::Vector3(0, Wall::GRID_SIZE/4 ,Wall::GRID_SIZE));
+    hostCamera->setNearClipDistance(5);
 }
 //---------------------------------------------------------------------------
 void BaseApplication::createFrameListener(void)
