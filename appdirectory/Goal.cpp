@@ -25,8 +25,9 @@ Goal::Goal(
     mp.get()->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
     mp.get()->setReceiveShadows(false);
 
+    tr.setRotation(btQuaternion(btVector3(0.0, 1.0, 0.0), -1.5708));
 	shape = new btBoxShape(btVector3(15, 15, 15));
-	mass = 0.05f;
+	mass = 0.00f;
     shape->calculateLocalInertia(mass, inertia);
 	motionState = new OgreMotionState(tr, rootNode);
         
@@ -37,5 +38,4 @@ Goal::Goal(
     simulator->gameObjects.push_back(this);
 
     moveBy(Ogre::Vector3(0, 4.5, -25));
-    rotateBy(Ogre::Quaternion(Ogre::Radian(Ogre::Degree(-90)), Ogre::Vector3::UNIT_Y));
 }

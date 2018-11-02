@@ -31,7 +31,7 @@ Field::Field(
   geom->setCastShadows(false);
 
   tr.setOrigin(btVector3(0.0, -5.0, 0.0));
-  shape = new btBoxShape(btVector3(SIZE * 0.5, SIZE * 0.5, SIZE * 0.5));
+  shape = new btBoxShape(btVector3(SIZE, 0.2f, SIZE));
   mass = 0.0;
   motionState = new OgreMotionState(tr, rootNode);
   body = new btRigidBody(mass, motionState, shape);

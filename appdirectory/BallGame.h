@@ -19,11 +19,9 @@
 
 class Paddle;
 class Ball;
-class Wall;
 class BallScoreCallback;
 class BallPaddleCallback;
 class BallFloorCallback;
-class WallCallback;
 
 class BallGame : public BaseApplication
 {
@@ -55,7 +53,6 @@ protected:
 	BallScoreCallback* mBallScoreCallback;
 	BallPaddleCallback* mBallPaddleCallback;
     BallFloorCallback* mBallFloorCallback;
-    WallCallback* mWallCallback;
     CEGUI::OgreRenderer* mRenderer;
     virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);
     virtual void createScene(void);

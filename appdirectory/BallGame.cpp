@@ -22,7 +22,6 @@
 #include "BallScoreCallback.h"
 #include "BallPaddleCallback.h"
 #include "BallFloorCallback.h"
-#include "WallCallback.h"
 #include "Field.h"
 #include "Goal.h"
 

@@ -16,7 +16,6 @@ http://www.ogre3d.org/wiki/
 */
 
 #include "BaseApplication.h"
-#include "Wall.h"
 #include <OgreTextureManager.h>
 #include "src/audio.h"
 
@@ -91,9 +90,9 @@ void BaseApplication::createCamera(void)
     // Create the camera
     mCamera = mSceneMgr->createCamera("MainCam");
 
-    mCamera->setPosition(Ogre::Vector3(0, 0, Wall::GRID_SIZE*5/4));
+    mCamera->setPosition(Ogre::Vector3(0, 0, 25));
     // Look back along -Z
-    mCamera->lookAt(Ogre::Vector3(0, -Wall::GRID_SIZE/4 ,-Wall::GRID_SIZE));
+    mCamera->lookAt(Ogre::Vector3(0, -5 , -20));
     mCamera->setNearClipDistance(5);
 }
 //---------------------------------------------------------------------------
