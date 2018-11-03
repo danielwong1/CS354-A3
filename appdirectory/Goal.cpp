@@ -25,17 +25,14 @@ Goal::Goal(
     mp.get()->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
     mp.get()->setReceiveShadows(false);
 
-	shape = new btBoxShape(btVector3(15, 15, 15));
-	mass = 0.05f;
+	shape = new btBoxShape(btVector3(5, 5, 5));
+	mass = 1.00f;
     shape->calculateLocalInertia(mass, inertia);
 	motionState = new OgreMotionState(tr, rootNode);
         
 	body = new btRigidBody(mass, motionState, shape, inertia);
     body->setUserPointer((void*) this);
-    body->setRestitution(0.95f);
+    body->setRestitution(1.0f);
     simulator->dynamicsWorld->addRigidBody(body);
     simulator->gameObjects.push_back(this);
-
-    moveBy(Ogre::Vector3(0, 4.5, -25));
-    rotateBy(Ogre::Quaternion(Ogre::Radian(Ogre::Degree(-90)), Ogre::Vector3::UNIT_Y));
 }

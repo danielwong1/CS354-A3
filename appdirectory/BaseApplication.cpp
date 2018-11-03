@@ -257,27 +257,11 @@ bool BaseApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
 //---------------------------------------------------------------------------
 bool BaseApplication::keyPressed( const OIS::KeyEvent &arg )
 {
-  if (arg.key == OIS::KC_ESCAPE) {
-    mShutDown = true;
-  }
-
-  return true;
+    return true;
 }
 //---------------------------------------------------------------------------
 bool BaseApplication::keyReleased(const OIS::KeyEvent &arg)
 {
-    if (arg.key == OIS::KC_O) {
-        soundOn = !soundOn;
-    }
-    if (arg.key == OIS::KC_M) {
-        if(musicOn) {
-            pauseAudio();
-            musicOn = false;
-        } else {
-            unpauseAudio();
-            musicOn = true;
-        }
-    }
     return true;
 }
 //---------------------------------------------------------------------------

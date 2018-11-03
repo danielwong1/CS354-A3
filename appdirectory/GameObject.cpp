@@ -40,32 +40,31 @@ GameObject::GameObject() : name(""),
 }
 
 void GameObject::moveBy(const Ogre::Vector3 &distance) {
-    btTransform worldTransform;
-    motionState->getWorldTransform(worldTransform);
-
-    btVector3 origin = worldTransform.getOrigin();
-    worldTransform.setOrigin(origin + btVector3(distance.x, distance.y, distance.z));
-    motionState->setWorldTransform(worldTransform);
+    rootNode->translate(distance);
+    
+    btTransform transform = body->getCenterOfMassTransform();
+    btVector3 origin = transform.getOrigin();
+    transform.setOrigin(origin + btVector3(distance.x, distance.y, distance.z));
+    body->setCenterOfMassTransform(transform);
 }
 
 void GameObject::moveTo(const Ogre::Vector3 &position) {
-    btTransform worldTransform;
-    motionState->getWorldTransform(worldTransform);
+    rootNode->setPosition(position);
 
-    worldTransform.setOrigin(btVector3(position.x, position.y, position.z));
-    motionState->setWorldTransform(worldTransform);
+    btTransform transform = body->getCenterOfMassTransform();
+    transform.setOrigin(btVector3(position.x, position.y, position.z));
+    body->setCenterOfMassTransform(transform);
 }
 
 void GameObject::rotateBy(const Ogre::Quaternion &rotation) {
-    btTransform worldTransform;
-    motionState->getWorldTransform(worldTransform);
+    btTransform transform = body->getCenterOfMassTransform();
 
     Ogre::Radian angle;
     Ogre::Vector3 axis;
     rotation.ToAngleAxis(angle, axis);
 
     btQuaternion bulletRotation(btVector3(axis.x, axis.y, axis.z), btScalar(angle.valueRadians()));
-    btQuaternion currentRotation = worldTransform.getRotation();
-    worldTransform.setRotation(currentRotation * bulletRotation);
-    motionState->setWorldTransform(worldTransform);
+    btQuaternion currentRotation = transform.getRotation();
+    transform.setRotation(currentRotation * bulletRotation);
+    body->setCenterOfMassTransform(transform);
 }

@@ -24,6 +24,8 @@ class BallScoreCallback;
 class BallPaddleCallback;
 class BallFloorCallback;
 class WallCallback;
+class Arrow;
+class Goal;
 
 class BallGame : public BaseApplication
 {
@@ -45,10 +47,11 @@ public:
 
     void createCollisionCallbacks(void);
     void addResources(void);
-
+    void destroyArrow(void);
 	Paddle* mPaddle;
 	Ball* mBall;
-
+    Arrow* mArrow;
+    Goal* mGoal;
 	Field* mField;
 
 protected:
@@ -57,18 +60,22 @@ protected:
     BallFloorCallback* mBallFloorCallback;
     WallCallback* mWallCallback;
     CEGUI::OgreRenderer* mRenderer;
+    CEGUI::Window* startRoot;
+
     virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);
     virtual void createScene(void);
     virtual bool mouseMoved(const OIS::MouseEvent &ev);
     virtual bool mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id);
     virtual bool mousePressed(const OIS::MouseEvent &arg, OIS::MouseButtonID id);
+    virtual bool keyReleased(const OIS::KeyEvent &arg);
+    virtual bool keyPressed( const OIS::KeyEvent &arg);
     void setupCEGUI(void);
 
     void reset(btTransform ballTransform, btVector3 origin);
 
     void setupSDL(void);
     bool hostClick(const CEGUI::EventArgs &e);
-
+    bool clientClick(const CEGUI::EventArgs &e);
 private:
     int currentRotationX;
     int currentRotationY;

@@ -15,7 +15,7 @@ Ball::Ball(Ogre::String name,
     this->simulator = simulator;
     colliding = false;
     f_colliding = false;
-    floorBounces = 0;
+    
     rootNode = this->sceneMgr->getRootSceneNode()->createChildSceneNode();
 	geom = this->sceneMgr->createEntity(name, "sphere.mesh");
 	rootNode->attachObject(geom);
@@ -33,8 +33,8 @@ Ball::Ball(Ogre::String name,
         
 	body = new btRigidBody(mass, motionState, shape, inertia);
     body->setUserPointer((void*) this);
-    body->setRestitution(0.95f);
-    body->setFriction(0);
+    body->setRestitution(0.6f);
+
     simulator->dynamicsWorld->addRigidBody(body);
     simulator->gameObjects.push_back(this);
 }
