@@ -34,6 +34,7 @@ btScalar BallScoreCallback::addSingleResult(btManifoldPoint& cp,
 			playSound("sounds/ball_hit_wall.wav", SDL_MIX_MAXVOLUME);
 		}
 		bGame->collisionClock->reset();
-		bGame->scoreObj->setScore(bGame->scoreObj->score + 1);
+		
+        //bGame->scoreObj->setScore(bGame->scoreObj->score + 1);
 	}
 }

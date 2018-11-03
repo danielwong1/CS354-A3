@@ -6,11 +6,15 @@
 class Score
 {
     public:
-        int score;
+        int hostScore;
+        int clientScore;
         CEGUI::Window *scoreWindow;
 
         Score();
-        void setScore(int count);
+        void incrementClientScore(void); 
+        void incrementHostScore(void);
+        void setScore(void);
+
 };
 
 #endif

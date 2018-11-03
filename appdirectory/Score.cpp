@@ -5,7 +5,8 @@
 
 Score::Score()
 {
-    score = 0;
+    clientScore = 0;
+    hostScore = 0;
     CEGUI::SchemeManager::getSingleton().createFromFile("TaharezLook.scheme");
 
     CEGUI::WindowManager &wmgr = CEGUI::WindowManager::getSingleton();
@@ -13,8 +14,7 @@ Score::Score()
 
     scoreWindow = wmgr.createWindow("TaharezLook/StaticText", "Score/StaticText");
     std::stringstream scoreString;
-	scoreString << " Score: " << score;
-    scoreWindow->setText(scoreString.str());
+    setScore();
 
     scoreWindow->setSize(CEGUI::USize(CEGUI::UDim(0.085, 0), CEGUI::UDim(0.05, 0)));
     scoreWindow->setPosition(CEGUI::UVector2(CEGUI::UDim( 0.01f, 0 ), CEGUI::UDim( 0.01f, 0 ) ) );
@@ -22,9 +22,21 @@ Score::Score()
     CEGUI::System::getSingleton().getDefaultGUIContext().setRootWindow(sheet);
 }
 
-void Score::setScore(int count) {
-    score = count;
+void Score::incrementHostScore()
+{
+    hostScore++;
+    setScore();
+}
+
+void Score::incrementClientScore()
+{
+    clientScore++;
+    setScore();
+}
+
+void Score::setScore()
+{
     std::stringstream scoreString;
-	scoreString << " Score: " << score;
+	scoreString << " Score: " << hostScore << " - " << clientScore;
     scoreWindow->setText(scoreString.str());
 }
