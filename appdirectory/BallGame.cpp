@@ -141,19 +141,24 @@ bool BallGame::frameRenderingQueued(const Ogre::FrameEvent& evt)
     // Send the position of the ball
     if (isHost) {
         btVector3 ballOrigin = mBall->getPosition();
+        btVector3 paddleOrigin = mPaddle->getPosition();
 
-        MessageType messageType = BALL_POS;
+        MessageType messageType = POSITION;
 
-        BallPositionMessage message;
-        message.x_coord = ballOrigin.x();
-        message.y_coord = ballOrigin.y();
-        message.z_coord = ballOrigin.z();
+        PositionMessage message;
+        message.ballXCoord = ballOrigin.x();
+        message.ballYCoord = ballOrigin.y();
+        message.ballZCoord = ballOrigin.z();
 
-        size_t messageSize = sizeof(BallPositionMessage) + sizeof(MessageType);
+        message.paddleXCoord = paddleOrigin.x();
+        message.paddleYCoord = paddleOrigin.y();
+        message.paddleZCoord = paddleOrigin.z();
+
+        size_t messageSize = sizeof(PositionMessage) + sizeof(MessageType);
         char* buffer = new char[messageSize];
         memcpy(buffer, &messageType, sizeof(MessageType));
 
-        memcpy(buffer + sizeof(MessageType), &message, sizeof(BallPositionMessage));
+        memcpy(buffer + sizeof(MessageType), &message, sizeof(PositionMessage));
 
         network->messageClients(PROTOCOL_TCP, buffer, messageSize);
         delete buffer;
@@ -194,15 +199,20 @@ bool BallGame::frameRenderingQueued(const Ogre::FrameEvent& evt)
 
             MessageType* messageType = (MessageType*)serverData->output;
             switch(*messageType) {
-                case BALL_POS: {
-                    BallPositionMessage* message = new BallPositionMessage();
+                case POSITION: {
+                    PositionMessage* message = new PositionMessage();
 
-                    memcpy(message, serverData->output + sizeof(MessageType), sizeof(BallPositionMessage));
-                    float x = message->x_coord;
-                    float y = message->y_coord;
-                    float z = message->z_coord;
+                    memcpy(message, serverData->output + sizeof(MessageType), sizeof(PositionMessage));
+                    float x = message->ballXCoord;
+                    float y = message->ballYCoord;
+                    float z = message->ballZCoord;
 
                     mBall->moveTo(Ogre::Vector3(x, y, z));
+
+                    x = message->paddleXCoord;
+                    y = message->paddleYCoord;
+                    z = message->paddleZCoord;
+                    mPaddle->moveTo(Ogre::Vector3(x, y, z));
 
                     delete message;
                     break;

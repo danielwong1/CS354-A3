@@ -29,7 +29,7 @@ class Arrow;
 class Goal;
 
 // Start this at 16 so we don't get 0 by accident
-enum MessageType { KICK = (1 << 4), BALL_POS };
+enum MessageType { KICK = (1 << 4), POSITION };
 
 struct KickMessage {
     float x_val;
@@ -37,11 +37,16 @@ struct KickMessage {
     float z_val;
 };
 
-struct BallPositionMessage {
-    float x_coord;
-    float y_coord;
-    float z_coord;
+struct PositionMessage {
+    float ballXCoord;
+    float ballYCoord;
+    float ballZCoord;
+
+    float paddleXCoord;
+    float paddleYCoord;
+    float paddleZCoord;
 };
+
 
 class BallGame : public BaseApplication
 {

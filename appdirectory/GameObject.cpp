@@ -70,8 +70,7 @@ void GameObject::rotateBy(const Ogre::Quaternion &rotation) {
 }
 
 btVector3 GameObject::getPosition() const {
-    btTransform worldTransform;
-    motionState->getWorldTransform(worldTransform);
+    const btTransform& worldTransform = body->getCenterOfMassTransform();
     return worldTransform.getOrigin();
 }
 

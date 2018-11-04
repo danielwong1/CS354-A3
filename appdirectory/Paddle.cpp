@@ -35,8 +35,8 @@ Paddle::Paddle(Ogre::SceneManager* sceneMgr,
     simulator->dynamicsWorld->addRigidBody(body);
     simulator->gameObjects.push_back(this);
 
-    body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
-    body->setActivationState(DISABLE_DEACTIVATION);
+    // body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+    // body->setActivationState(DISABLE_DEACTIVATION);
     moveBy(Ogre::Vector3(0.0f, 2.0f, 8.0f));    
 }
 
