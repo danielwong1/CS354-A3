@@ -91,7 +91,7 @@ void BaseApplication::createCamera(void)
     // Create the camera
     mCamera = mSceneMgr->createCamera("MainCam");
 
-    mCamera->setPosition(Ogre::Vector3(0, 0, Wall::GRID_SIZE*5/4));
+    mCamera->setPosition(Ogre::Vector3(0, 5, Wall::GRID_SIZE*5/4));
     // Look back along -Z
     mCamera->lookAt(Ogre::Vector3(0, -Wall::GRID_SIZE/4 ,-Wall::GRID_SIZE));
     mCamera->setNearClipDistance(5);

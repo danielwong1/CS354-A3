@@ -1,0 +1,14 @@
+
+material arrow/Material
+{
+	technique
+	{
+		pass
+		{
+			ambient 0.117647 0.117647 0.117647 .5
+			diffuse 1.0 0.5 0.25 1.0
+		}
+
+	}
+
+}

@@ -23,8 +23,8 @@ Arrow::Arrow(Ogre::SceneManager* sceneMgr) {
     childNode->translate(Ogre::Vector3(0, 0, -3.0f));
 
     geom->setCastShadows(false);
-    geom->setMaterialName("Examples/Water0");
-    Ogre::MaterialPtr mp = Ogre::MaterialManager::getSingleton().getByName("Examples/Water0");
+    geom->setMaterialName("arrow/Material");
+    Ogre::MaterialPtr mp = Ogre::MaterialManager::getSingleton().getByName("arrow/Material");
     mp.get()->setReceiveShadows(false);
 }
 

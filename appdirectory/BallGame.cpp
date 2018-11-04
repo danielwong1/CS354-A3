@@ -27,6 +27,7 @@
 #include "Arrow.h"
 #include "Goal.h"
 
+
 std::string BallGame::ballString = "ball";
 std::string BallGame::botString = "bot";
 int BallGame::rotationBound = 400;
@@ -35,6 +36,7 @@ BallGame::BallGame() : mRenderer(0)
 {
     currentRotationX = 0;
     currentRotationY = 0;
+    kicked = false;
 }
 
 BallGame::~BallGame(void)
@@ -44,6 +46,7 @@ BallGame::~BallGame(void)
 
 void BallGame::reset(btTransform ballTransform, btVector3 origin) {
     started = false;
+    kicked = false;
     /*ballTransform.setOrigin(btVector3(0.0f, 0.0f, 0.0f));
     ballTransform.setRotation(btQuaternion::getIdentity());
 
@@ -79,46 +82,135 @@ bool BallGame::frameRenderingQueued(const Ogre::FrameEvent& evt)
         return false;
 
 
-    if(mKeyboard->isKeyDown(OIS::KC_UP)) {
-            currentRotationY++;
-            mArrow->rotateArrowBy(Ogre::Quaternion(rotationSpeed, Ogre::Vector3(1, 0, 0)));
+    if (!isHost) {
+        if(mKeyboard->isKeyDown(OIS::KC_UP)) {
+                currentRotationY++;
+                mArrow->rotateArrowBy(Ogre::Quaternion(rotationSpeed, Ogre::Vector3(1, 0, 0)));
+        }
+
+        if(mKeyboard->isKeyDown(OIS::KC_RIGHT)) {
+                currentRotationX++;
+                mArrow->rotateArrowBy(Ogre::Quaternion(-rotationSpeed, Ogre::Vector3(0, 1, 0)));
+        }
+
+        if(mKeyboard->isKeyDown(OIS::KC_DOWN)) {
+                currentRotationY--;
+                mArrow->rotateArrowBy(Ogre::Quaternion(-rotationSpeed, Ogre::Vector3(1, 0, 0)));
+        }
+
+        if(mKeyboard->isKeyDown(OIS::KC_LEFT)) {
+                currentRotationX--;
+                mArrow->rotateArrowBy(Ogre::Quaternion(rotationSpeed, Ogre::Vector3(0, 1, 0)));
+        }
     }
 
-    if(mKeyboard->isKeyDown(OIS::KC_RIGHT)) {
-            currentRotationX++;
-            mArrow->rotateArrowBy(Ogre::Quaternion(-rotationSpeed, Ogre::Vector3(0, 1, 0)));
-    }
+    // btTransform trans;
+    // mBall->motionState->getWorldTransform(trans);
 
-    if(mKeyboard->isKeyDown(OIS::KC_DOWN)) {
-            currentRotationY--;
-            mArrow->rotateArrowBy(Ogre::Quaternion(-rotationSpeed, Ogre::Vector3(1, 0, 0)));
-    }
 
-    if(mKeyboard->isKeyDown(OIS::KC_LEFT)) {
-            currentRotationX--;
-            mArrow->rotateArrowBy(Ogre::Quaternion(rotationSpeed, Ogre::Vector3(0, 1, 0)));
-    }
-
-    btTransform trans;
-    mBall->motionState->getWorldTransform(trans);
-    printf("%f %f\n", trans.getOrigin().y(), mBall->rootNode->getPosition().y);
-    if(mKeyboard->isKeyDown(OIS::KC_SPACE) && !started) {
-        started = true;
+    if(mKeyboard->isKeyDown(OIS::KC_SPACE) && !isHost && !kicked) {
+        kicked = true;
         Ogre::Vector3 direction = mArrow->rootNode->getOrientation() * Ogre::Vector3::NEGATIVE_UNIT_Z;
         direction.normalise();
-        mBall->body->applyCentralImpulse(kickForce * btVector3(direction.x, direction.y, direction.z));
-        mBall->body->setActivationState(ACTIVE_TAG);
+
+        MessageType messageType = KICK;
+
+        KickMessage message;
+        message.x_val = direction.x;
+        message.y_val = direction.y;
+        message.z_val = direction.z;
+
+        size_t messageSize = sizeof(KickMessage) + sizeof(MessageType);
+        char* buffer = new char[messageSize];
+        memcpy(buffer, &messageType, sizeof(MessageType));
+
+        memcpy(buffer + sizeof(MessageType), &message, sizeof(KickMessage));
+        network->messageServer(PROTOCOL_TCP, buffer, messageSize);
+        delete buffer;
     }
+
 
     cameraPos = mCamera->getPosition();
     mCamera->setPosition(cameraPos + Ogre::Vector3(cameraSpeed * mRot.x, -cameraSpeed * mRot.y, 0));
     mRot = Ogre::Vector2::ZERO;
-    
+
     if(simulator != NULL) {
         simulator->dynamicsWorld->stepSimulation(simulator->physicsClock->getTimeSeconds());
         simulator->physicsClock->reset();
     }
+
+    // Send the position of the ball
+    if (isHost) {
+        btVector3 ballOrigin = mBall->getPosition();
+
+        MessageType messageType = BALL_POS;
+
+        BallPositionMessage message;
+        message.x_coord = ballOrigin.x();
+        message.y_coord = ballOrigin.y();
+        message.z_coord = ballOrigin.z();
+
+        size_t messageSize = sizeof(BallPositionMessage) + sizeof(MessageType);
+        char* buffer = new char[messageSize];
+        memcpy(buffer, &messageType, sizeof(MessageType));
+
+        memcpy(buffer + sizeof(MessageType), &message, sizeof(BallPositionMessage));
+
+        network->messageClients(PROTOCOL_TCP, buffer, messageSize);
+        delete buffer;
+    }
     
+    if (network->pollForActivity(1)) {
+        if (isHost) {
+            // printf("Host received activity\n");
+            ClientData* data = network->tcpClientData[0];
+            if (data == NULL) {
+                return true;
+            }
+
+            MessageType* messageType = (MessageType*)data->output;
+            switch(*messageType) {
+                case KICK: {
+                    KickMessage* message = new KickMessage();
+
+                    memcpy(message, data->output + sizeof(MessageType), sizeof(KickMessage));
+                    float x = message->x_val;
+                    float y = message->y_val;
+                    float z = message->z_val;
+
+                    // printf("Host Kick: (%f, %f, %f)\n", x, y, z);
+                    mBall->body->applyCentralImpulse(kickForce * btVector3(x, y, z));
+                    mBall->body->setActivationState(ACTIVE_TAG);
+                    delete message;
+                    break;
+                }
+            }
+        }
+        else {
+            ClientData* serverData = &network->tcpServerData;
+            if (serverData == NULL) {
+                return true;
+            }
+
+            MessageType* messageType = (MessageType*)serverData->output;
+            switch(*messageType) {
+                case BALL_POS: {
+                    BallPositionMessage* message = new BallPositionMessage();
+
+                    memcpy(message, serverData->output + sizeof(MessageType), sizeof(BallPositionMessage));
+                    float x = message->x_coord;
+                    float y = message->y_coord;
+                    float z = message->z_coord;
+
+                    mBall->moveTo(Ogre::Vector3(x, y, z));
+
+                    delete message;
+                    break;
+                }
+            }
+        }
+    }
+
     return true;
 }
 
@@ -180,18 +272,43 @@ void BallGame::setupSDL()
     //playSound("sounds/door1.wav", SDL_MIX_MAXVOLUME / 2);
 }
 
+void BallGame::setupNetwork()
+{
+    printf("isHost: %s\n", isHost ? "true" : "false");
+    network = new NetManager();
+    network->initNetManager();
+    if (isHost)
+    {
+        network->addNetworkInfo(PROTOCOL_TCP, NULL, 51215);
+        network->acceptConnections();
+        printf("HostName: %s\n", network->getIPstring().c_str());
+        network->startServer();
+    } 
+    else
+    {
+        network->addNetworkInfo(PROTOCOL_TCP, ipAddr->c_str(), 51215);
+        network->startClient();
+    }
+}
+
 void BallGame::createScene(void)
 {
     setupCEGUI();
     setupSDL();
+    setupNetwork();
     addResources();
     mSceneMgr->setShadowTechnique(Ogre::SHADOWTYPE_STENCIL_MODULATIVE);
 
     mField = new Field(mSceneMgr, simulator);
     mBall = new Ball(ballString, mSceneMgr, simulator);
     //mBall->moveTo(Ogre::Vector3(0.0, 0.0, -Field::SIZE / 2 - 10));
-    mArrow = new Arrow(mSceneMgr);
-    mArrow->moveArrowTo(Ogre::Vector3(-5.0, 5.0, 10.0 ));
+    
+    if (!isHost) {
+        mArrow = new Arrow(mSceneMgr);
+        mArrow->moveArrowTo(Ogre::Vector3(-5.0, 5.0, 10.0 ));
+    }
+
+    
     mBall->moveTo(Ogre::Vector3(0.0, 4.0, 10.0));
     //mPaddle = new Paddle(mSceneMgr, simulator);
 
@@ -227,9 +344,11 @@ bool BallGame::mouseMoved(const OIS::MouseEvent &ev) {
 }
 
 void BallGame::destroyArrow(void) {
-    Ogre::SceneNode* parent = mArrow->rootNode->getParentSceneNode();
-    parent->detachObject(mArrow->name);
-    mSceneMgr->destroyEntity(mArrow->geom->getName());
+    if (mArrow) {
+        Ogre::SceneNode* parent = mArrow->rootNode->getParentSceneNode();
+        parent->detachObject(mArrow->name);
+        mSceneMgr->destroyEntity(mArrow->geom->getName());
+    }
 }
 
 
@@ -311,26 +430,30 @@ extern "C" {
 #else
     int main(int argc, char *argv[]) {
 #endif
-        
         // Create application object
         BallGame app;
 
         const struct option long_options[] = {
             {"ip", 1, 0, 'i'},
-            {0,0,0,0},
+            {NULL, 0, NULL, 0},
         };
         int option_index = 0;
-        int c = 0;
+        int get_opt_err = 0;
 
-        while(c != -1) {
-            c = getopt_long(argc, argv, "i:", long_options, &option_index);
-            switch(c) 
+        while(get_opt_err != -1) {
+            get_opt_err = getopt_long(argc, argv, "i:", long_options, &option_index);
+            switch(get_opt_err)
             {
-                case 'i':
+                case 'i': {
                     app.ipAddr = new std::string(optarg);
-                    printf("ip: %s", app.ipAddr->c_str());
+                    std::cout << "ip: " << app.ipAddr << std::endl;
+                    app.isHost = false;
                     break;
+                }
             }
+        }
+        if (app.ipAddr == NULL) {
+            app.isHost = true;
         }
 
         try {

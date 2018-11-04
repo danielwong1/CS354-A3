@@ -16,6 +16,7 @@
 #include "BaseApplication.h"
 #include "Score.h"
 #include "Field.h"
+#include "NetManager.h"
 
 class Paddle;
 class Ball;
@@ -27,9 +28,25 @@ class WallCallback;
 class Arrow;
 class Goal;
 
+// Start this at 16 so we don't get 0 by accident
+enum MessageType { KICK = (1 << 4), BALL_POS };
+
+struct KickMessage {
+    float x_val;
+    float y_val;
+    float z_val;
+};
+
+struct BallPositionMessage {
+    float x_coord;
+    float y_coord;
+    float z_coord;
+};
+
 class BallGame : public BaseApplication
 {
 public:
+    bool kicked;
     static std::string ballString;
     static std::string botString;
     static int rotationBound;
@@ -40,6 +57,8 @@ public:
     bool started;
     Ogre::Vector2 mRot;
     std::string* ipAddr;
+    bool isHost;
+    NetManager* network;
 
     BallGame(void);
     virtual ~BallGame(void);
@@ -74,6 +93,7 @@ protected:
     void reset(btTransform ballTransform, btVector3 origin);
 
     void setupSDL(void);
+    void setupNetwork(void);
     bool hostClick(const CEGUI::EventArgs &e);
     bool clientClick(const CEGUI::EventArgs &e);
 private:

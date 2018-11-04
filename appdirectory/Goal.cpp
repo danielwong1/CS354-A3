@@ -26,7 +26,7 @@ Goal::Goal(
     mp.get()->setReceiveShadows(false);
 
 	shape = new btBoxShape(btVector3(5, 5, 5));
-	mass = 1.00f;
+	mass = 10.00f;
     shape->calculateLocalInertia(mass, inertia);
 	motionState = new OgreMotionState(tr, rootNode);
         
