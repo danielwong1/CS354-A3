@@ -23,3 +23,5 @@ m4/
 ltmain.sh
 libtool
 install-sh
+
+*log.txt
