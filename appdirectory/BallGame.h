@@ -54,7 +54,6 @@ public:
     Score* scoreObj;
     btClock* collisionClock;
     btClock* f_collisionClock;
-    bool started;
     Ogre::Vector2 mRot;
     std::string* ipAddr;
     bool isHost;
@@ -63,6 +62,7 @@ public:
     BallGame(void);
     virtual ~BallGame(void);
     virtual void go();
+    virtual void createViewports();
 
     void createCollisionCallbacks(void);
     void addResources(void);

@@ -17,14 +17,14 @@ Paddle::Paddle(Ogre::SceneManager* sceneMgr,
     rootNode = this->sceneMgr->getRootSceneNode()->createChildSceneNode();
 	geom = this->sceneMgr->createEntity(Ogre::SceneManager::PT_CUBE);
 	rootNode->attachObject(geom);
-    rootNode->scale(0.06f, 0.06f, 0.01f);
+    rootNode->scale(0.04f, 0.04f, 0.01f);
 
     geom->setCastShadows(false);
-    geom->setMaterialName("Examples/Water0");
-    Ogre::MaterialPtr mp = Ogre::MaterialManager::getSingleton().getByName("Examples/Water0");
+    geom->setMaterialName("paddle/Material");
+    Ogre::MaterialPtr mp = Ogre::MaterialManager::getSingleton().getByName("paddle/Material");
     mp.get()->setReceiveShadows(false);
 
-	shape = new btBoxShape(btVector3(3.0f, 2.0f, 0.5f));
+	shape = new btBoxShape(btVector3(2.0f, 2.0f, 0.5f));
 	mass = 0.0f;
 	motionState = new OgreMotionState(tr, rootNode);
 

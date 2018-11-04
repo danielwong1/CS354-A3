@@ -19,10 +19,7 @@
 #include <getopt.h>
 #include "Ball.h"
 #include "Paddle.h"
-#include "BallScoreCallback.h"
 #include "BallPaddleCallback.h"
-#include "BallFloorCallback.h"
-#include "WallCallback.h"
 #include "Field.h"
 #include "Arrow.h"
 #include "Goal.h"
@@ -45,7 +42,6 @@ BallGame::~BallGame(void)
 }
 
 void BallGame::reset(btTransform ballTransform, btVector3 origin) {
-    started = false;
     kicked = false;
     /*ballTransform.setOrigin(btVector3(0.0f, 0.0f, 0.0f));
     ballTransform.setRotation(btQuaternion::getIdentity());
@@ -75,13 +71,15 @@ bool BallGame::frameRenderingQueued(const Ogre::FrameEvent& evt)
 
     double cameraSpeed = 0.005;
     double kickForce = 3.0f;
+    Ogre::Camera* camera = isHost ? hostCamera : mCamera;
     Ogre::Radian rotationSpeed = Ogre::Radian(Ogre::Degree(.1));
-    Ogre::Vector3 cameraPos = mCamera->getPosition();
+    Ogre::Vector3 cameraPos = camera->getPosition();
 
     if(mKeyboard->isKeyDown(OIS::KC_ESCAPE))
         return false;
 
 
+    // Arrow controls
     if (!isHost) {
         if(mKeyboard->isKeyDown(OIS::KC_UP)) {
                 currentRotationY++;
@@ -104,10 +102,7 @@ bool BallGame::frameRenderingQueued(const Ogre::FrameEvent& evt)
         }
     }
 
-    // btTransform trans;
-    // mBall->motionState->getWorldTransform(trans);
-
-
+    // Kick the ball
     if(mKeyboard->isKeyDown(OIS::KC_SPACE) && !isHost && !kicked) {
         kicked = true;
         Ogre::Vector3 direction = mArrow->rootNode->getOrientation() * Ogre::Vector3::NEGATIVE_UNIT_Z;
@@ -130,10 +125,14 @@ bool BallGame::frameRenderingQueued(const Ogre::FrameEvent& evt)
     }
 
 
-    cameraPos = mCamera->getPosition();
-    mCamera->setPosition(cameraPos + Ogre::Vector3(cameraSpeed * mRot.x, -cameraSpeed * mRot.y, 0));
+    cameraPos = camera->getPosition();
+    camera->setPosition(cameraPos + Ogre::Vector3(cameraSpeed * mRot.x * (isHost ? -1 : 1), -cameraSpeed * mRot.y, 0));
+    if (isHost)
+        mPaddle->moveBy(Ogre::Vector3(-cameraSpeed * mRot.x, -cameraSpeed * mRot.y, 0));
+
     mRot = Ogre::Vector2::ZERO;
 
+    // Physics!
     if(simulator != NULL) {
         simulator->dynamicsWorld->stepSimulation(simulator->physicsClock->getTimeSeconds());
         simulator->physicsClock->reset();
@@ -160,6 +159,7 @@ bool BallGame::frameRenderingQueued(const Ogre::FrameEvent& evt)
         delete buffer;
     }
     
+    // Networking!
     if (network->pollForActivity(1)) {
         if (isHost) {
             // printf("Host received activity\n");
@@ -310,7 +310,8 @@ void BallGame::createScene(void)
 
     
     mBall->moveTo(Ogre::Vector3(0.0, 4.0, 10.0));
-    //mPaddle = new Paddle(mSceneMgr, simulator);
+    mPaddle = new Paddle(mSceneMgr, simulator);
+    mPaddle->moveBy(Ogre::Vector3(0, 5, -30));
 
     mSceneMgr->setSkyBox(true, "sky/Material");
     mGoal = new Goal(mSceneMgr, simulator);
@@ -325,14 +326,17 @@ void BallGame::createScene(void)
     
     light->setCastShadows(true);
 
+    Ogre::Light* light2 = mSceneMgr->createLight("SpotLight1");
+    light2->setPosition(Ogre::Vector3(0, 10, -27.5));
+    mSceneMgr->setShadowColour(Ogre::ColourValue(0.5, 0.5, 0.5));
+    
+    light2->setCastShadows(true);
+
     createCollisionCallbacks();
 }
 
 void BallGame::createCollisionCallbacks(void) {
-    // mBallScoreCallback = new BallScoreCallback(this);
-    // mBallFloorCallback = new BallFloorCallback(this);
     mBallPaddleCallback = new BallPaddleCallback(this);
-    // mWallCallback = new WallCallback(this);
 }
 
 bool BallGame::mouseMoved(const OIS::MouseEvent &ev) {
@@ -405,10 +409,21 @@ bool BallGame::keyReleased(const OIS::KeyEvent &arg)
     return true;
 }
 
+void BallGame::createViewports(void)
+{
+    Ogre::Camera* camera = isHost ? hostCamera : mCamera;
+    // Create one viewport, entire window
+    Ogre::Viewport* vp = mWindow->addViewport(camera);
+    vp->setBackgroundColour(Ogre::ColourValue(0,0,0));
+
+    // Alter the camera aspect ratio to match the viewport
+    camera->setAspectRatio(Ogre::Real(vp->getActualWidth()) / Ogre::Real(vp->getActualHeight()));
+}
+
+
 void BallGame::go()
 {
     soundOn = true;
-    started = false;
     simulator = new Physics();
     collisionClock = new btClock();
     f_collisionClock = new btClock();

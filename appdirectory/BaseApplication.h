@@ -104,6 +104,8 @@ protected:
 
     Ogre::Root*                 mRoot;
     Ogre::Camera*               mCamera;
+    Ogre::Camera*               hostCamera;
+
     Ogre::SceneManager*         mSceneMgr;
     Ogre::RenderWindow*         mWindow;
     Ogre::String                mResourcesCfg;
