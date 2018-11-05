@@ -60,18 +60,21 @@ public:
     btClock* collisionClock;
     btClock* f_collisionClock;
     Ogre::Vector2 mRot;
-    std::string* ipAddr;
+    std::string ipAddr;
     bool isHost;
+    bool started;
     NetManager* network;
 
     BallGame(void);
     virtual ~BallGame(void);
     virtual void go();
-    virtual void createViewports();
+    void createViewports();
 
+    void createDefaultCamera(void);
     void createCollisionCallbacks(void);
     void addResources(void);
     void destroyArrow(void);
+    void createGame(void);
 	Paddle* mPaddle;
 	Ball* mBall;
     Arrow* mArrow;

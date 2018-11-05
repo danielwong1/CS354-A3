@@ -19,12 +19,14 @@ Arrow::Arrow(Ogre::SceneManager* sceneMgr) {
 	geom = this->sceneMgr->createEntity(this->name, Ogre::SceneManager::PT_CUBE);
 
 	childNode->attachObject(geom);
-    childNode->scale(0.005f, 0.005f, 0.03f);
-    childNode->translate(Ogre::Vector3(0, 0, -3.0f));
+    childNode->scale(0.002f, 0.002f, 0.03f);
+    childNode->translate(Ogre::Vector3(0, 0, -1.5f));
 
     geom->setCastShadows(false);
     geom->setMaterialName("arrow/Material");
     Ogre::MaterialPtr mp = Ogre::MaterialManager::getSingleton().getByName("arrow/Material");
+    mp.get()->setDiffuse(0.0, 0.3, 0.8, 0.4);
+    mp.get()->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
     mp.get()->setReceiveShadows(false);
 }
 
