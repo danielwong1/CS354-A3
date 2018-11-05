@@ -1,23 +1,23 @@
-#include "Wall.h"
+
+#include "GoalieWall.h"
 #include <OgreRoot.h>
 #include <OgreEntity.h>
 #include <OgreMeshManager.h>
 #include <btBulletCollisionCommon.h>
 #include "Physics.h"
-#include "Field.h"
 
-Wall::Wall(Ogre::String name, 
-    Ogre::SceneManager* sceneMgr, 
-    Physics* simulator,
-    Ogre::Vector3 direction) {
+GoalieWall::GoalieWall(Ogre::String name, Ogre::SceneManager* sceneMgr,
+    Physics* simulator) {
     this->name = name;
     this->sceneMgr = sceneMgr;
     this->simulator = simulator;
-    
-    Ogre::MovablePlane plane(direction, -Field::SIZE/2);
+
+    Ogre::Vector3 direction = Ogre::Vector3::UNIT_Z;
+    //TODO: The wall is hard coded to faced the Z direction; flip it when done
+    Ogre::MovablePlane plane(direction, 0);
     Ogre::MeshManager::getSingleton().createPlane(
         name, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, 
-        plane, Field::SIZE, Field::SIZE, Field::SIZE, Field::SIZE, true, 1, 1, 1, 
+        plane, 21, 10, 1, 1, true, 1, 1, 1, 
         direction.perpendicular()
     );
 
@@ -31,13 +31,15 @@ Wall::Wall(Ogre::String name,
     geom->setCastShadows(false);
 
     btVector3 btDir = btVector3(direction.x, direction.y, direction.z);
-    tr.setOrigin(-Field::SIZE * btDir);
-    shape = new btBoxShape(btVector3(Field::SIZE/2, Field::SIZE/2, Field::SIZE/2));
+    // tr.setOrigin(-23.5f * btDir);
+    shape = new btBoxShape(btVector3(21, 10, 0.1f));
     mass = 0.0;
     motionState = new OgreMotionState(tr, rootNode);
     body = new btRigidBody(mass, motionState, shape);
     body->setUserPointer((void*) this);
     body->setRestitution(1.0f);
     body->setFriction(0);
-    simulator->dynamicsWorld->addRigidBody(body);
+    simulator->dynamicsWorld->addRigidBody(body, GOAL_WALL, GOAL_WALL | ETC);
+
+    this->moveBy(Ogre::Vector3(0, 4.5f, -21.5f));
 }

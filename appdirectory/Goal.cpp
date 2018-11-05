@@ -33,6 +33,6 @@ Goal::Goal(
 	body = new btRigidBody(mass, motionState, shape, inertia);
     body->setUserPointer((void*) this);
     body->setRestitution(1.0f);
-    simulator->dynamicsWorld->addRigidBody(body);
+    simulator->dynamicsWorld->addRigidBody(body, GOAL, GOAL | ETC);
     simulator->gameObjects.push_back(this);
 }

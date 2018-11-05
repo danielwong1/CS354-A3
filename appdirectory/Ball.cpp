@@ -35,6 +35,6 @@ Ball::Ball(Ogre::String name,
     body->setUserPointer((void*) this);
     body->setRestitution(0.6f);
 
-    simulator->dynamicsWorld->addRigidBody(body);
+    simulator->dynamicsWorld->addRigidBody(body, ETC, ETC | GOAL_WALL | GOAL);
     simulator->gameObjects.push_back(this);
 }

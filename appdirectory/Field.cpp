@@ -38,5 +38,5 @@ Field::Field(
   body = new btRigidBody(mass, motionState, shape);
   body->setUserPointer((void*) this);
   body->setRestitution(1.0f);
-  simulator->dynamicsWorld->addRigidBody(body);
+  simulator->dynamicsWorld->addRigidBody(body, ETC, ETC | GOAL_WALL | GOAL);
 }

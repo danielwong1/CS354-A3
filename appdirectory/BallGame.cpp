@@ -23,6 +23,7 @@
 #include "Field.h"
 #include "Arrow.h"
 #include "Goal.h"
+#include "Wall.h"
 
 
 std::string BallGame::ballString = "ball";
@@ -310,6 +311,12 @@ void BallGame::createScene(void)
     mSceneMgr->setShadowTechnique(Ogre::SHADOWTYPE_STENCIL_MODULATIVE);
 
     mField = new Field(mSceneMgr, simulator);
+    lWall = new Wall("leftWall", mSceneMgr, simulator, Ogre::Vector3::UNIT_X);
+    tWall = new Wall("topWall", mSceneMgr, simulator, Ogre::Vector3::NEGATIVE_UNIT_Y);
+    rWall = new Wall("rightWall", mSceneMgr, simulator, Ogre::Vector3::NEGATIVE_UNIT_X);
+    cWall = new Wall("clientWall", mSceneMgr, simulator, Ogre::Vector3::NEGATIVE_UNIT_Z);
+    hWall = new Wall("hostWall", mSceneMgr, simulator, Ogre::Vector3::UNIT_Z);
+    gWall = new GoalieWall("goalieWall", mSceneMgr, simulator);
     mBall = new Ball(ballString, mSceneMgr, simulator);
     //mBall->moveTo(Ogre::Vector3(0.0, 0.0, -Field::SIZE / 2 - 10));
     
@@ -321,7 +328,7 @@ void BallGame::createScene(void)
     
     mBall->moveTo(Ogre::Vector3(0.0, 4.0, 10.0));
     mPaddle = new Paddle(mSceneMgr, simulator);
-    mPaddle->moveBy(Ogre::Vector3(0, 5, -30));
+    mPaddle->moveBy(Ogre::Vector3(0, 5, -29.5));
 
     mSceneMgr->setSkyBox(true, "sky/Material");
     mGoal = new Goal(mSceneMgr, simulator);

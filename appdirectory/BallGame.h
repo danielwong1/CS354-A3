@@ -16,6 +16,8 @@
 #include "BaseApplication.h"
 #include "Score.h"
 #include "Field.h"
+#include "Wall.h"
+#include "GoalieWall.h"
 #include "NetManager.h"
 
 class Paddle;
@@ -77,6 +79,12 @@ public:
     Arrow* mArrow;
     Goal* mGoal;
 	Field* mField;
+    Wall* lWall;
+    Wall* rWall;
+    Wall* tWall;
+    Wall* cWall;
+    Wall* hWall;
+    GoalieWall* gWall;
 
 protected:
 	BallScoreCallback* mBallScoreCallback;

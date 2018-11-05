@@ -5,6 +5,12 @@
 #include "GameObject.h"
 #include <btBulletDynamicsCommon.h>
 
+enum collisionMask {
+    GOAL = 1,
+    GOAL_WALL = 2,
+    ETC = 4
+};
+
 class Physics {
     public: 
     btDefaultCollisionConfiguration* collisionConfiguration;
