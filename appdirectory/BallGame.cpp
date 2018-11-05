@@ -65,163 +65,179 @@ bool BallGame::frameRenderingQueued(const Ogre::FrameEvent& evt)
 {
     if(mWindow->isClosed())
         return false;
- 
+    
+    if(mKeyboard->isKeyDown(OIS::KC_ESCAPE))
+        return false;
+
     //Need to capture/update each device
     mKeyboard->capture();
     mMouse->capture();
 
-    double cameraSpeed = 0.005;
-    double kickForce = 3.0f;
-    Ogre::Camera* camera = isHost ? hostCamera : mCamera;
-    Ogre::Radian rotationSpeed = Ogre::Radian(Ogre::Degree(.1));
-    Ogre::Vector3 cameraPos = camera->getPosition();
+    if(started) {
+        double cameraSpeed = 0.005;
+        double kickForce = 3.0f;
+        Ogre::Camera* camera = isHost ? hostCamera : mCamera;
+        Ogre::Radian rotationSpeed = Ogre::Radian(Ogre::Degree(.1));
+        Ogre::Vector3 cameraPos = camera->getPosition();
 
-    if(mKeyboard->isKeyDown(OIS::KC_ESCAPE))
-        return false;
+       
 
+        // Arrow controls
+        if (!isHost) {
+            if(mKeyboard->isKeyDown(OIS::KC_UP)) {
+                    currentRotationY++;
+                    mArrow->rotateArrowBy(Ogre::Quaternion(rotationSpeed, Ogre::Vector3(1, 0, 0)));
+            }
 
-    // Arrow controls
-    if (!isHost) {
-        if(mKeyboard->isKeyDown(OIS::KC_UP)) {
-                currentRotationY++;
-                mArrow->rotateArrowBy(Ogre::Quaternion(rotationSpeed, Ogre::Vector3(1, 0, 0)));
+            if(mKeyboard->isKeyDown(OIS::KC_RIGHT)) {
+                    currentRotationX++;
+                    mArrow->rotateArrowBy(Ogre::Quaternion(-rotationSpeed, Ogre::Vector3(0, 1, 0)));
+            }
+
+            if(mKeyboard->isKeyDown(OIS::KC_DOWN)) {
+                    currentRotationY--;
+                    mArrow->rotateArrowBy(Ogre::Quaternion(-rotationSpeed, Ogre::Vector3(1, 0, 0)));
+            }
+
+            if(mKeyboard->isKeyDown(OIS::KC_LEFT)) {
+                    currentRotationX--;
+                    mArrow->rotateArrowBy(Ogre::Quaternion(rotationSpeed, Ogre::Vector3(0, 1, 0)));
+            }
         }
 
-        if(mKeyboard->isKeyDown(OIS::KC_RIGHT)) {
-                currentRotationX++;
-                mArrow->rotateArrowBy(Ogre::Quaternion(-rotationSpeed, Ogre::Vector3(0, 1, 0)));
+        // Kick the ball
+        if(mKeyboard->isKeyDown(OIS::KC_SPACE) && !isHost && !kicked) {
+            kicked = true;
+            Ogre::Vector3 direction = mArrow->rootNode->getOrientation() * Ogre::Vector3::NEGATIVE_UNIT_Z;
+            direction.normalise();
+
+            MessageType messageType = KICK;
+
+            KickMessage message;
+            message.x_val = direction.x;
+            message.y_val = direction.y;
+            message.z_val = direction.z;
+
+            size_t messageSize = sizeof(KickMessage) + sizeof(MessageType);
+            char* buffer = new char[messageSize];
+            memcpy(buffer, &messageType, sizeof(MessageType));
+
+            memcpy(buffer + sizeof(MessageType), &message, sizeof(KickMessage));
+            network->messageServer(PROTOCOL_TCP, buffer, messageSize);
+            delete buffer;
         }
 
-        if(mKeyboard->isKeyDown(OIS::KC_DOWN)) {
-                currentRotationY--;
-                mArrow->rotateArrowBy(Ogre::Quaternion(-rotationSpeed, Ogre::Vector3(1, 0, 0)));
+
+        if(isHost) {
+            cameraPos = camera->getPosition();
+            camera->setPosition(cameraPos + Ogre::Vector3(cameraSpeed * mRot.x * (isHost ? -1 : 1), -cameraSpeed * mRot.y, 0));
+            mPaddle->moveBy(Ogre::Vector3(-cameraSpeed * mRot.x, -cameraSpeed * mRot.y, 0));
+            btVector3 position = mPaddle->getPosition();
+            mPaddle->moveTo(Ogre::Vector3(
+                Ogre::Math::Clamp(position.x(), -10.0f, 10.0f),
+                Ogre::Math::Clamp(position.y(), 1.5f, 8.5f),
+                position.z()
+            ));
+            cameraPos = camera->getPosition();
+            camera->setPosition(Ogre::Vector3(
+                Ogre::Math::Clamp(cameraPos.x, -10.0f, 10.0f),
+                Ogre::Math::Clamp(cameraPos.y, 1.5f, 8.5f),
+                cameraPos.z
+            ));
         }
 
-        if(mKeyboard->isKeyDown(OIS::KC_LEFT)) {
-                currentRotationX--;
-                mArrow->rotateArrowBy(Ogre::Quaternion(rotationSpeed, Ogre::Vector3(0, 1, 0)));
+
+        mRot = Ogre::Vector2::ZERO;
+
+        // Physics!
+        if(simulator != NULL) {
+            simulator->dynamicsWorld->stepSimulation(simulator->physicsClock->getTimeSeconds());
+            simulator->physicsClock->reset();
         }
-    }
 
-    // Kick the ball
-    if(mKeyboard->isKeyDown(OIS::KC_SPACE) && !isHost && !kicked) {
-        kicked = true;
-        Ogre::Vector3 direction = mArrow->rootNode->getOrientation() * Ogre::Vector3::NEGATIVE_UNIT_Z;
-        direction.normalise();
-
-        MessageType messageType = KICK;
-
-        KickMessage message;
-        message.x_val = direction.x;
-        message.y_val = direction.y;
-        message.z_val = direction.z;
-
-        size_t messageSize = sizeof(KickMessage) + sizeof(MessageType);
-        char* buffer = new char[messageSize];
-        memcpy(buffer, &messageType, sizeof(MessageType));
-
-        memcpy(buffer + sizeof(MessageType), &message, sizeof(KickMessage));
-        network->messageServer(PROTOCOL_TCP, buffer, messageSize);
-        delete buffer;
-    }
-
-
-    cameraPos = camera->getPosition();
-    camera->setPosition(cameraPos + Ogre::Vector3(cameraSpeed * mRot.x * (isHost ? -1 : 1), -cameraSpeed * mRot.y, 0));
-    if (isHost)
-        mPaddle->moveBy(Ogre::Vector3(-cameraSpeed * mRot.x, -cameraSpeed * mRot.y, 0));
-
-    mRot = Ogre::Vector2::ZERO;
-
-    // Physics!
-    if(simulator != NULL) {
-        simulator->dynamicsWorld->stepSimulation(simulator->physicsClock->getTimeSeconds());
-        simulator->physicsClock->reset();
-    }
-
-    // Send the position of the ball
-    if (isHost) {
-        btVector3 ballOrigin = mBall->getPosition();
-        btVector3 paddleOrigin = mPaddle->getPosition();
-
-        MessageType messageType = POSITION;
-
-        PositionMessage message;
-        message.ballXCoord = ballOrigin.x();
-        message.ballYCoord = ballOrigin.y();
-        message.ballZCoord = ballOrigin.z();
-
-        message.paddleXCoord = paddleOrigin.x();
-        message.paddleYCoord = paddleOrigin.y();
-        message.paddleZCoord = paddleOrigin.z();
-
-        size_t messageSize = sizeof(PositionMessage) + sizeof(MessageType);
-        char* buffer = new char[messageSize];
-        memcpy(buffer, &messageType, sizeof(MessageType));
-
-        memcpy(buffer + sizeof(MessageType), &message, sizeof(PositionMessage));
-
-        network->messageClients(PROTOCOL_TCP, buffer, messageSize);
-        delete buffer;
-    }
-    
-    // Networking!
-    if (network->pollForActivity(1)) {
+        // Send the position of the ball
         if (isHost) {
-            // printf("Host received activity\n");
-            ClientData* data = network->tcpClientData[0];
-            if (data == NULL) {
-                return true;
-            }
+            btVector3 ballOrigin = mBall->getPosition();
+            btVector3 paddleOrigin = mPaddle->getPosition();
 
-            MessageType* messageType = (MessageType*)data->output;
-            switch(*messageType) {
-                case KICK: {
-                    KickMessage* message = new KickMessage();
+            MessageType messageType = POSITION;
 
-                    memcpy(message, data->output + sizeof(MessageType), sizeof(KickMessage));
-                    float x = message->x_val;
-                    float y = message->y_val;
-                    float z = message->z_val;
+            PositionMessage message;
+            message.ballXCoord = ballOrigin.x();
+            message.ballYCoord = ballOrigin.y();
+            message.ballZCoord = ballOrigin.z();
 
-                    // printf("Host Kick: (%f, %f, %f)\n", x, y, z);
-                    mBall->body->applyCentralImpulse(kickForce * btVector3(x, y, z));
-                    mBall->body->setActivationState(ACTIVE_TAG);
-                    delete message;
-                    break;
+            message.paddleXCoord = paddleOrigin.x();
+            message.paddleYCoord = paddleOrigin.y();
+            message.paddleZCoord = paddleOrigin.z();
+
+            size_t messageSize = sizeof(PositionMessage) + sizeof(MessageType);
+            char* buffer = new char[messageSize];
+            memcpy(buffer, &messageType, sizeof(MessageType));
+
+            memcpy(buffer + sizeof(MessageType), &message, sizeof(PositionMessage));
+
+            network->messageClients(PROTOCOL_TCP, buffer, messageSize);
+            delete buffer;
+        }
+        
+        // Networking!
+        if (network->pollForActivity(1)) {
+            if (isHost) {
+                // printf("Host received activity\n");
+                ClientData* data = network->tcpClientData[0];
+                if (data == NULL) {
+                    return true;
+                }
+
+                MessageType* messageType = (MessageType*)data->output;
+                switch(*messageType) {
+                    case KICK: {
+                        KickMessage* message = new KickMessage();
+
+                        memcpy(message, data->output + sizeof(MessageType), sizeof(KickMessage));
+                        float x = message->x_val;
+                        float y = message->y_val;
+                        float z = message->z_val;
+
+                        // printf("Host Kick: (%f, %f, %f)\n", x, y, z);
+                        mBall->body->applyCentralImpulse(kickForce * btVector3(x, y, z));
+                        mBall->body->setActivationState(ACTIVE_TAG);
+                        delete message;
+                        break;
+                    }
                 }
             }
-        }
-        else {
-            ClientData* serverData = &network->tcpServerData;
-            if (serverData == NULL) {
-                return true;
-            }
+            else {
+                ClientData* serverData = &network->tcpServerData;
+                if (serverData == NULL) {
+                    return true;
+                }
 
-            MessageType* messageType = (MessageType*)serverData->output;
-            switch(*messageType) {
-                case POSITION: {
-                    PositionMessage* message = new PositionMessage();
+                MessageType* messageType = (MessageType*)serverData->output;
+                switch(*messageType) {
+                    case POSITION: {
+                        PositionMessage* message = new PositionMessage();
 
-                    memcpy(message, serverData->output + sizeof(MessageType), sizeof(PositionMessage));
-                    float x = message->ballXCoord;
-                    float y = message->ballYCoord;
-                    float z = message->ballZCoord;
+                        memcpy(message, serverData->output + sizeof(MessageType), sizeof(PositionMessage));
+                        float x = message->ballXCoord;
+                        float y = message->ballYCoord;
+                        float z = message->ballZCoord;
 
-                    mBall->moveTo(Ogre::Vector3(x, y, z));
+                        mBall->moveTo(Ogre::Vector3(x, y, z));
 
-                    x = message->paddleXCoord;
-                    y = message->paddleYCoord;
-                    z = message->paddleZCoord;
-                    mPaddle->moveTo(Ogre::Vector3(x, y, z));
+                        x = message->paddleXCoord;
+                        y = message->paddleYCoord;
+                        z = message->paddleZCoord;
+                        mPaddle->moveTo(Ogre::Vector3(x, y, z));
 
-                    delete message;
-                    break;
+                        delete message;
+                        break;
+                    }
                 }
             }
         }
     }
-
     return true;
 }
 
@@ -232,7 +248,7 @@ void BallGame::setupCEGUI(void) {
     CEGUI::Scheme::setDefaultResourceGroup("Schemes");
     CEGUI::WidgetLookManager::setDefaultResourceGroup("LookNFeel");
     CEGUI::WindowManager::setDefaultResourceGroup("Layouts");
-    /*CEGUI::SchemeManager::getSingleton().createFromFile("VanillaSkin.scheme");
+    CEGUI::SchemeManager::getSingleton().createFromFile("VanillaSkin.scheme");
     
     CEGUI::WindowManager &wmgr = CEGUI::WindowManager::getSingleton();
     startRoot = wmgr.loadLayoutFromFile( "menu.layout" );
@@ -242,7 +258,15 @@ void BallGame::setupCEGUI(void) {
     CEGUI::System::getSingleton().getDefaultGUIContext().setDefaultFont( "DejaVuSans-12" );
 
     startRoot->getChild("Host")->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&BallGame::hostClick, this));
-    startRoot->getChild("Kicker")->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&BallGame::hostClick, this));*/
+    startRoot->getChild("Kicker")->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&BallGame::clientClick, this));
+}
+
+void BallGame::setupScore(void) {
+    CEGUI::WindowManager &wmgr = CEGUI::WindowManager::getSingleton();
+    scoreRoot = wmgr.loadLayoutFromFile( "score.layout" );
+    CEGUI::System::getSingleton().getDefaultGUIContext().setRootWindow( scoreRoot );
+    CEGUI::FontManager::getSingleton().createFreeTypeFont( "DejaVuSans-8", 8, true, "DejaVuSans.ttf", "Fonts");
+    CEGUI::System::getSingleton().getDefaultGUIContext().setDefaultFont( "DejaVuSans-8" );
 }
 
 void BallGame::addResources() {
@@ -297,14 +321,39 @@ void BallGame::setupNetwork()
     } 
     else
     {
-        network->addNetworkInfo(PROTOCOL_TCP, ipAddr->c_str(), 51215);
+        std::cout << "ip: " << this->ipAddr << std::endl;
+        network->addNetworkInfo(PROTOCOL_TCP, ipAddr.c_str(), 51215);
         network->startClient();
     }
 }
 
 void BallGame::createScene(void)
 {
+    started = false;
+    createDefaultCamera();
     setupCEGUI();
+}
+
+void BallGame::createDefaultCamera(void) {
+    mCamera = mSceneMgr->createCamera("MainCam1");
+    Ogre::Viewport* vp = mWindow->addViewport(mCamera);
+    vp->setBackgroundColour(Ogre::ColourValue(.1,.1,.1));
+
+    // Alter the camera aspect ratio to match the viewport
+    mCamera->setAspectRatio(Ogre::Real(vp->getActualWidth()) / Ogre::Real(vp->getActualHeight()));
+}
+
+void BallGame::createGame(void) {
+    soundOn = true;
+    started = true;
+    simulator = new Physics();
+    collisionClock = new btClock();
+    f_collisionClock = new btClock();
+
+    createCamera();
+    createViewports();
+
+    setupScore();
     setupSDL();
     setupNetwork();
     addResources();
@@ -322,7 +371,7 @@ void BallGame::createScene(void)
     
     if (!isHost) {
         mArrow = new Arrow(mSceneMgr);
-        mArrow->moveArrowTo(Ogre::Vector3(-5.0, 5.0, 10.0 ));
+        mArrow->moveArrowTo(Ogre::Vector3(0, 0.2, 10.0));
     }
 
     
@@ -366,24 +415,32 @@ bool BallGame::mouseMoved(const OIS::MouseEvent &ev) {
 
 void BallGame::destroyArrow(void) {
     if (mArrow) {
-        Ogre::SceneNode* parent = mArrow->rootNode->getParentSceneNode();
-        parent->detachObject(mArrow->name);
-        mSceneMgr->destroyEntity(mArrow->geom->getName());
+        mSceneMgr->getRootSceneNode()->detachObject("root");
+        mSceneMgr->destroyEntity("root");
     }
 }
 
 
 bool BallGame::hostClick(const CEGUI::EventArgs &e) {
+    this->isHost = true;
     startRoot->hide();
-    scoreObj = new Score(); 
+
     CEGUI::System::getSingleton().getDefaultGUIContext().getMouseCursor().hide( );
+    createGame();
     return true;
 }
 
 bool BallGame::clientClick(const CEGUI::EventArgs &e) {
+    this->isHost = false;
+    //parse ip address
+    
+    const CEGUI::Editbox* editbox = static_cast<const CEGUI::Editbox*>(startRoot->getChild("Insert"));
+    this->ipAddr = editbox->getText().c_str();
+
     startRoot->hide(); 
-    scoreObj = new Score();
+
     CEGUI::System::getSingleton().getDefaultGUIContext().getMouseCursor().hide( );
+    createGame();
     return true;
 }
 
@@ -430,6 +487,7 @@ void BallGame::createViewports(void)
 {
     Ogre::Camera* camera = isHost ? hostCamera : mCamera;
     // Create one viewport, entire window
+    mWindow->removeAllViewports();
     Ogre::Viewport* vp = mWindow->addViewport(camera);
     vp->setBackgroundColour(Ogre::ColourValue(0,0,0));
 
@@ -440,10 +498,6 @@ void BallGame::createViewports(void)
 
 void BallGame::go()
 {
-    soundOn = true;
-    simulator = new Physics();
-    collisionClock = new btClock();
-    f_collisionClock = new btClock();
     BaseApplication::go();
 }
 
@@ -464,7 +518,7 @@ extern "C" {
 #endif
         // Create application object
         BallGame app;
-
+/*
         const struct option long_options[] = {
             {"ip", 1, 0, 'i'},
             {NULL, 0, NULL, 0},
@@ -487,7 +541,7 @@ extern "C" {
         if (app.ipAddr == NULL) {
             app.isHost = true;
         }
-
+*/
         try {
             app.go();
         } catch(Ogre::Exception& e)  {

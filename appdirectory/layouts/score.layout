@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GUILayout version="4">
+    <Window type="DefaultWindow" name="Root" >
+        <Property name="Area" value="{{0.0,0},{0.0,0},{.2,0},{.1,0}}" />
+        <Window type="Vanilla/StaticText" name="Score1" >
+            <Property name="Text" value="Your Score: 0" />
+            <Property name="Area" value="{{0.0,0},{0.0,0},{1,0},{.5,0}}" />
+        </Window>
+        <Window type="Vanilla/StaticText" name="Other Score" >
+            <Property name="Text" value="Opponent Score: 0" />
+            <Property name="Area" value="{{0.0,0},{0.5,0},{1,0},{1,0}}" />
+        </Window>
+    </Window>
+    
+</GUILayout>
