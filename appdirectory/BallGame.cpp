@@ -131,6 +131,18 @@ bool BallGame::frameRenderingQueued(const Ogre::FrameEvent& evt)
             cameraPos = camera->getPosition();
             camera->setPosition(cameraPos + Ogre::Vector3(cameraSpeed * mRot.x * (isHost ? -1 : 1), -cameraSpeed * mRot.y, 0));
             mPaddle->moveBy(Ogre::Vector3(-cameraSpeed * mRot.x, -cameraSpeed * mRot.y, 0));
+            btVector3 position = mPaddle->getPosition();
+            mPaddle->moveTo(Ogre::Vector3(
+                Ogre::Math::Clamp(position.x(), -10.0f, 10.0f),
+                Ogre::Math::Clamp(position.y(), 1.5f, 8.5f),
+                position.z()
+            ));
+            cameraPos = camera->getPosition();
+            camera->setPosition(Ogre::Vector3(
+                Ogre::Math::Clamp(cameraPos.x, -10.0f, 10.0f),
+                Ogre::Math::Clamp(cameraPos.y, 1.5f, 8.5f),
+                cameraPos.z
+            ));
         }
 
 
@@ -248,6 +260,14 @@ void BallGame::setupCEGUI(void) {
     startRoot->getChild("Kicker")->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&BallGame::clientClick, this));
 }
 
+void BallGame::setupScore(void) {
+    CEGUI::WindowManager &wmgr = CEGUI::WindowManager::getSingleton();
+    scoreRoot = wmgr.loadLayoutFromFile( "score.layout" );
+    CEGUI::System::getSingleton().getDefaultGUIContext().setRootWindow( scoreRoot );
+    CEGUI::FontManager::getSingleton().createFreeTypeFont( "DejaVuSans-8", 8, true, "DejaVuSans.ttf", "Fonts");
+    CEGUI::System::getSingleton().getDefaultGUIContext().setDefaultFont( "DejaVuSans-8" );
+}
+
 void BallGame::addResources() {
     Ogre::ResourceGroupManager* resourceGroupManager = Ogre::ResourceGroupManager::getSingletonPtr();
     resourceGroupManager->addResourceLocation(
@@ -332,6 +352,7 @@ void BallGame::createGame(void) {
     createCamera();
     createViewports();
 
+    setupScore();
     setupSDL();
     setupNetwork();
     addResources();
@@ -396,7 +417,7 @@ void BallGame::destroyArrow(void) {
 bool BallGame::hostClick(const CEGUI::EventArgs &e) {
     this->isHost = true;
     startRoot->hide();
-    scoreObj = new Score(); 
+
     CEGUI::System::getSingleton().getDefaultGUIContext().getMouseCursor().hide( );
     createGame();
     return true;
@@ -411,7 +432,6 @@ bool BallGame::clientClick(const CEGUI::EventArgs &e) {
 
     startRoot->hide(); 
 
-    scoreObj = new Score();
     CEGUI::System::getSingleton().getDefaultGUIContext().getMouseCursor().hide( );
     createGame();
     return true;

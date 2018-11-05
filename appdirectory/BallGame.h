@@ -57,6 +57,8 @@ public:
     static int rotationBound;
     Physics* simulator;
     Score* scoreObj;
+    int playerScore;
+    int hostScore;
     btClock* collisionClock;
     btClock* f_collisionClock;
     Ogre::Vector2 mRot;
@@ -75,6 +77,7 @@ public:
     void addResources(void);
     void destroyArrow(void);
     void createGame(void);
+    void setupScore(void);
 	Paddle* mPaddle;
 	Ball* mBall;
     Arrow* mArrow;
@@ -88,6 +91,7 @@ protected:
     WallCallback* mWallCallback;
     CEGUI::OgreRenderer* mRenderer;
     CEGUI::Window* startRoot;
+    CEGUI::Window* scoreRoot;
 
     virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);
     virtual void createScene(void);
