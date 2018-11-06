@@ -1,13 +1,14 @@
-#ifndef __BallFloorCallback_h_
-#define __BallFloorCallback_h_
+#ifndef __BallBoundaryCallback_h_
+#define __BallBoundaryCallback_h_
 
 #include <btBulletCollisionCommon.h>
 
 class BallGame;
+class NetManager;
 
-struct BallFloorCallback : public btCollisionWorld::ContactResultCallback {
+struct BallBoundaryCallback : public btCollisionWorld::ContactResultCallback {
 
-	BallFloorCallback(BallGame* ballGame);
+	BallBoundaryCallback(BallGame* ballGame, NetManager* network);
  public:
   btScalar addSingleResult(btManifoldPoint& cp,
 	const btCollisionObjectWrapper* colObj0Wrap,
@@ -19,6 +20,7 @@ struct BallFloorCallback : public btCollisionWorld::ContactResultCallback {
 
  private:
  	BallGame* bGame;
+    NetManager* network;
 };
 
 #endif

@@ -25,8 +25,8 @@ Wall::Wall(Ogre::String name,
     geom = this->sceneMgr->createEntity(name);
     rootNode->attachObject(geom);
 
-    geom->setMaterialName("assignment3/grass");
-    Ogre::MaterialPtr mp = Ogre::MaterialManager::getSingleton().getByName("assignment3/grass");
+    geom->setMaterialName("invisible/Material");
+    Ogre::MaterialPtr mp = Ogre::MaterialManager::getSingleton().getByName("invisible/Material");
     mp.get()->setReceiveShadows(true);
     geom->setCastShadows(false);
 

@@ -5,6 +5,7 @@
 #include <btBulletCollisionCommon.h>
 
 class BallGame;
+class NetManager;
 
 struct BallPaddleCallback : public btCollisionWorld::ContactResultCallback {
 
@@ -20,6 +21,7 @@ struct BallPaddleCallback : public btCollisionWorld::ContactResultCallback {
 
  private:
 	BallGame* bGame;
+    NetManager* network;
 };
 
 #endif

@@ -24,14 +24,12 @@ class Paddle;
 class Ball;
 class Wall;
 class BallScoreCallback;
-class BallPaddleCallback;
-class BallFloorCallback;
-class WallCallback;
+class BallBoundaryCallback;
 class Arrow;
 class Goal;
 
 // Start this at 16 so we don't get 0 by accident
-enum MessageType { KICK = (1 << 4), POSITION };
+enum MessageType { KICK = (1 << 4), POSITION, SCORE };
 
 struct KickMessage {
     float x_val;
@@ -49,6 +47,9 @@ struct PositionMessage {
     float paddleZCoord;
 };
 
+struct ScoreMessage {
+    int player;
+};
 
 class BallGame : public BaseApplication
 {
@@ -91,15 +92,15 @@ public:
     Wall* cWall;
     Wall* hWall;
     GoalieWall* gWall;
+    CEGUI::Window* scoreRoot;
+    void reset();
 
 protected:
 	BallScoreCallback* mBallScoreCallback;
-	BallPaddleCallback* mBallPaddleCallback;
-    BallFloorCallback* mBallFloorCallback;
-    WallCallback* mWallCallback;
+    BallBoundaryCallback* mBallBoundaryCallback;
     CEGUI::OgreRenderer* mRenderer;
     CEGUI::Window* startRoot;
-    CEGUI::Window* scoreRoot;
+    
 
     virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);
     virtual void createScene(void);
@@ -110,7 +111,7 @@ protected:
     virtual bool keyPressed( const OIS::KeyEvent &arg);
     void setupCEGUI(void);
 
-    void reset(btTransform ballTransform, btVector3 origin);
+    
 
     void setupSDL(void);
     void setupNetwork(void);

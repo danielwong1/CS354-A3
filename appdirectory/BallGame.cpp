@@ -19,7 +19,8 @@
 #include <getopt.h>
 #include "Ball.h"
 #include "Paddle.h"
-#include "BallPaddleCallback.h"
+#include "BallScoreCallback.h"
+#include "BallBoundaryCallback.h"
 #include "Field.h"
 #include "Arrow.h"
 #include "Goal.h"
@@ -42,8 +43,13 @@ BallGame::~BallGame(void)
     CEGUI::OgreRenderer::destroySystem();
 }
 
-void BallGame::reset(btTransform ballTransform, btVector3 origin) {
+void BallGame::reset() {
     kicked = false;
+    if (isHost) {
+        mBall->moveTo(Ogre::Vector3(0.0, 4.0, 10.0));
+        mBall->body->setLinearVelocity(btVector3(0, 0, 0));
+        mBall->body->setAngularVelocity(btVector3(0, 0, 0));
+    }
     /*ballTransform.setOrigin(btVector3(0.0f, 0.0f, 0.0f));
     ballTransform.setRotation(btQuaternion::getIdentity());
 
@@ -153,6 +159,15 @@ bool BallGame::frameRenderingQueued(const Ogre::FrameEvent& evt)
         if(simulator != NULL) {
             simulator->dynamicsWorld->stepSimulation(simulator->physicsClock->getTimeSeconds());
             simulator->physicsClock->reset();
+
+            if (isHost) {
+                simulator->dynamicsWorld->contactPairTest(mBall->body, lWall->body, *mBallBoundaryCallback);
+                simulator->dynamicsWorld->contactPairTest(mBall->body, tWall->body, *mBallBoundaryCallback);
+                simulator->dynamicsWorld->contactPairTest(mBall->body, rWall->body, *mBallBoundaryCallback);
+                simulator->dynamicsWorld->contactPairTest(mBall->body, cWall->body, *mBallBoundaryCallback);
+                simulator->dynamicsWorld->contactPairTest(mBall->body, hWall->body, *mBallBoundaryCallback);
+                simulator->dynamicsWorld->contactPairTest(mBall->body, gWall->body, *mBallScoreCallback);
+            }
         }
 
         // Send the position of the ball
@@ -232,6 +247,32 @@ bool BallGame::frameRenderingQueued(const Ogre::FrameEvent& evt)
                         mPaddle->moveTo(Ogre::Vector3(x, y, z));
 
                         delete message;
+                        break;
+                    }
+                    case SCORE: {
+                        ScoreMessage* message = new ScoreMessage();
+
+                        memcpy(message, serverData->output + sizeof(MessageType), sizeof(ScoreMessage));
+                        int player = message->player;
+
+                        // Host scored
+                        if (player == 0) {
+                            // increase opponent score
+                            hostScore += 1;
+                            std::stringstream scoreString;
+                            scoreString << "Opponent Score: " << hostScore;
+                            scoreRoot->getChild("Other Score")->setText(scoreString.str());
+                        }
+                        // Client Scored
+                        else {
+                            // increase my score
+                            playerScore += 1;
+                            std::stringstream scoreString;
+                            scoreString << "Your Score: " << playerScore;
+                            scoreRoot->getChild("Score1")->setText(scoreString.str());
+                        }
+
+                        reset();
                         break;
                     }
                 }
@@ -402,7 +443,8 @@ void BallGame::createGame(void) {
 }
 
 void BallGame::createCollisionCallbacks(void) {
-    mBallPaddleCallback = new BallPaddleCallback(this);
+    mBallScoreCallback = new BallScoreCallback(this, network);
+    mBallBoundaryCallback = new BallBoundaryCallback(this, network);
 }
 
 bool BallGame::mouseMoved(const OIS::MouseEvent &ev) {

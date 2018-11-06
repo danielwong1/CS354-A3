@@ -13,7 +13,7 @@ GoalieWall::GoalieWall(Ogre::String name, Ogre::SceneManager* sceneMgr,
     this->simulator = simulator;
 
     Ogre::Vector3 direction = Ogre::Vector3::UNIT_Z;
-    //TODO: The wall is hard coded to faced the Z direction; flip it when done
+    // //TODO: The wall is hard coded to faced the Z direction; flip it when done
     Ogre::MovablePlane plane(direction, 0);
     Ogre::MeshManager::getSingleton().createPlane(
         name, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, 
@@ -25,14 +25,14 @@ GoalieWall::GoalieWall(Ogre::String name, Ogre::SceneManager* sceneMgr,
     geom = this->sceneMgr->createEntity(name);
     rootNode->attachObject(geom);
 
-    geom->setMaterialName("assignment3/grass");
-    Ogre::MaterialPtr mp = Ogre::MaterialManager::getSingleton().getByName("assignment3/grass");
+    geom->setMaterialName("invisible/Material");
+    Ogre::MaterialPtr mp = Ogre::MaterialManager::getSingleton().getByName("invisible/Material");
     mp.get()->setReceiveShadows(true);
     geom->setCastShadows(false);
 
     btVector3 btDir = btVector3(direction.x, direction.y, direction.z);
     // tr.setOrigin(-23.5f * btDir);
-    shape = new btBoxShape(btVector3(21, 10, 0.1f));
+    shape = new btBoxShape(btVector3(15, 10, 0.1f));
     mass = 0.0;
     motionState = new OgreMotionState(tr, rootNode);
     body = new btRigidBody(mass, motionState, shape);
@@ -41,5 +41,5 @@ GoalieWall::GoalieWall(Ogre::String name, Ogre::SceneManager* sceneMgr,
     body->setFriction(0);
     simulator->dynamicsWorld->addRigidBody(body, GOAL_WALL, GOAL_WALL | ETC);
 
-    this->moveBy(Ogre::Vector3(0, 4.5f, -21.5f));
+    this->moveBy(Ogre::Vector3(0, 4.5f, -18.0f));
 }

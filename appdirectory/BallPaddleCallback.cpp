@@ -27,15 +27,7 @@ btScalar BallPaddleCallback::addSingleResult(btManifoldPoint& cp,
 	int index1) {
 
 
-	btQuaternion quaternion;
-	bGame->mPaddle->getRotation(quaternion);
-	bGame->mBall->floorBounces = 0;
-	btVector3 axis = quaternion.getAxis();
-	btScalar angle = quaternion.getAngle();
-	btVector3 initialNormal(0.0f, 0.0f, -1.0f);
-	btVector3 rotatedNormal = initialNormal.rotate(axis, angle).normalized();
-
-	bGame->mBall->body->applyCentralImpulse(rotatedNormal);
+	
 	if(bGame->soundOn) {
 		playSound("sounds/ball_hit_paddle.wav", SDL_MIX_MAXVOLUME / 10);
 	}

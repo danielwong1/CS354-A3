@@ -4,10 +4,11 @@
 #include <btBulletCollisionCommon.h>
 
 class BallGame;
+class NetManager;
 
 struct BallScoreCallback : public btCollisionWorld::ContactResultCallback {
 
-	BallScoreCallback(BallGame* ballGame);
+	BallScoreCallback(BallGame* ballGame, NetManager* network);
  public:
   btScalar addSingleResult(btManifoldPoint& cp,
 	const btCollisionObjectWrapper* colObj0Wrap,
@@ -19,6 +20,7 @@ struct BallScoreCallback : public btCollisionWorld::ContactResultCallback {
 
  private:
  	BallGame* bGame;
+     NetManager* network;
 };
 
 #endif
