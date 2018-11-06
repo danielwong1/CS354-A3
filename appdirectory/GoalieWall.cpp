@@ -14,21 +14,21 @@ GoalieWall::GoalieWall(Ogre::String name, Ogre::SceneManager* sceneMgr,
 
     Ogre::Vector3 direction = Ogre::Vector3::UNIT_Z;
     // //TODO: The wall is hard coded to faced the Z direction; flip it when done
-    Ogre::MovablePlane plane(direction, 0);
-    Ogre::MeshManager::getSingleton().createPlane(
-        name, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, 
-        plane, 21, 10, 1, 1, true, 1, 1, 1, 
-        direction.perpendicular()
-    );
+    // Ogre::MovablePlane plane(direction, 0);
+    // Ogre::MeshManager::getSingleton().createPlane(
+    //     name, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, 
+    //     plane, 21, 10, 1, 1, true, 1, 1, 1, 
+    //     direction.perpendicular()
+    // );
 
     rootNode = this->sceneMgr->getRootSceneNode()->createChildSceneNode();
-    geom = this->sceneMgr->createEntity(name);
-    rootNode->attachObject(geom);
+    // geom = this->sceneMgr->createEntity(name);
+    // rootNode->attachObject(geom);
 
-    geom->setMaterialName("invisible/Material");
-    Ogre::MaterialPtr mp = Ogre::MaterialManager::getSingleton().getByName("invisible/Material");
-    mp.get()->setReceiveShadows(true);
-    geom->setCastShadows(false);
+    // geom->setMaterialName("invisible/Material");
+    // Ogre::MaterialPtr mp = Ogre::MaterialManager::getSingleton().getByName("invisible/Material");
+    // mp.get()->setReceiveShadows(true);
+    // geom->setCastShadows(false);
 
     btVector3 btDir = btVector3(direction.x, direction.y, direction.z);
     // tr.setOrigin(-23.5f * btDir);
