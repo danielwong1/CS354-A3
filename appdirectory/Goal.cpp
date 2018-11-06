@@ -25,7 +25,7 @@ Goal::Goal(
     mp.get()->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
     mp.get()->setReceiveShadows(false);
 
-	shape = new btBoxShape(btVector3(5, 5, 5));
+	shape = new btBoxShape(btVector3(5, 5, 11));
 	mass = 10.00f;
     shape->calculateLocalInertia(mass, inertia);
 	motionState = new OgreMotionState(tr, rootNode);

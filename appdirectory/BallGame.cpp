@@ -36,6 +36,8 @@ BallGame::BallGame() : mRenderer(0)
     currentRotationX = 0;
     currentRotationY = 0;
     kicked = false;
+    playerScore = 0;
+    hostScore = 0;
 }
 
 BallGame::~BallGame(void)
@@ -81,7 +83,7 @@ bool BallGame::frameRenderingQueued(const Ogre::FrameEvent& evt)
 
     if(started) {
         double cameraSpeed = 0.005;
-        double kickForce = 3.0f;
+        double kickForce = 3.5f;
         Ogre::Camera* camera = isHost ? hostCamera : mCamera;
         Ogre::Radian rotationSpeed = Ogre::Radian(Ogre::Degree(.1));
         Ogre::Vector3 cameraPos = camera->getPosition();
@@ -418,7 +420,7 @@ void BallGame::createGame(void) {
     
     mBall->moveTo(Ogre::Vector3(0.0, 4.0, 10.0));
     mPaddle = new Paddle(mSceneMgr, simulator);
-    mPaddle->moveBy(Ogre::Vector3(0, 5, -29.5));
+    mPaddle->moveBy(Ogre::Vector3(0, 5, -26.0f));
 
     mSceneMgr->setSkyBox(true, "sky/Material");
     mGoal = new Goal(mSceneMgr, simulator);

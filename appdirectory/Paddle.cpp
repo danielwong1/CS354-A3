@@ -24,7 +24,7 @@ Paddle::Paddle(Ogre::SceneManager* sceneMgr,
     Ogre::MaterialPtr mp = Ogre::MaterialManager::getSingleton().getByName("paddle/Material");
     mp.get()->setReceiveShadows(false);
 
-	shape = new btBoxShape(btVector3(1.5f, 1.5f, 0.5f));
+	shape = new btBoxShape(btVector3(2.0f, 2.0f, 0.5f));
 	mass = 0.0f;
 	motionState = new OgreMotionState(tr, rootNode);
 

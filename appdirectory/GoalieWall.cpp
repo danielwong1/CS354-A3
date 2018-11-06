@@ -32,7 +32,7 @@ GoalieWall::GoalieWall(Ogre::String name, Ogre::SceneManager* sceneMgr,
 
     btVector3 btDir = btVector3(direction.x, direction.y, direction.z);
     // tr.setOrigin(-23.5f * btDir);
-    shape = new btBoxShape(btVector3(10, 5, 0.1f));
+    shape = new btBoxShape(btVector3(9.5f, 5, 0.1f));
     mass = 0.0;
     motionState = new OgreMotionState(tr, rootNode);
     body = new btRigidBody(mass, motionState, shape);
@@ -41,5 +41,5 @@ GoalieWall::GoalieWall(Ogre::String name, Ogre::SceneManager* sceneMgr,
     body->setFriction(0);
     simulator->dynamicsWorld->addRigidBody(body, GOAL_WALL, GOAL_WALL | ETC);
 
-    this->moveBy(Ogre::Vector3(0, 4.5f, -23.5f));
+    this->moveBy(Ogre::Vector3(0, 4.5f, -20.5f));
 }
