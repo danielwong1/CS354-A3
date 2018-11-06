@@ -14,21 +14,21 @@ Wall::Wall(Ogre::String name,
     this->sceneMgr = sceneMgr;
     this->simulator = simulator;
     
-    Ogre::MovablePlane plane(direction, -Field::SIZE/2);
-    Ogre::MeshManager::getSingleton().createPlane(
-        name, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, 
-        plane, Field::SIZE, Field::SIZE, Field::SIZE, Field::SIZE, true, 1, 1, 1, 
-        direction.perpendicular()
-    );
+    // Ogre::MovablePlane plane(direction, -Field::SIZE/2);
+    // Ogre::MeshManager::getSingleton().createPlane(
+    //     name, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, 
+    //     plane, Field::SIZE, Field::SIZE, Field::SIZE, Field::SIZE, true, 1, 1, 1, 
+    //     direction.perpendicular()
+    // );
 
     rootNode = this->sceneMgr->getRootSceneNode()->createChildSceneNode();
-    geom = this->sceneMgr->createEntity(name);
-    rootNode->attachObject(geom);
+    // geom = this->sceneMgr->createEntity(name);
+    // rootNode->attachObject(geom);
 
-    geom->setMaterialName("invisible/Material");
-    Ogre::MaterialPtr mp = Ogre::MaterialManager::getSingleton().getByName("invisible/Material");
-    mp.get()->setReceiveShadows(true);
-    geom->setCastShadows(false);
+    // geom->setMaterialName("invisible/Material");
+    // Ogre::MaterialPtr mp = Ogre::MaterialManager::getSingleton().getByName("invisible/Material");
+    // mp.get()->setReceiveShadows(true);
+    // geom->setCastShadows(false);
 
     btVector3 btDir = btVector3(direction.x, direction.y, direction.z);
     tr.setOrigin(-Field::SIZE * btDir);
